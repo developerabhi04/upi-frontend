@@ -1,0 +1,101 @@
+.similar-products {
+    padding: 5rem 0;
+
+    h2 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: #333;
+    }
+
+    .similar-product-card {
+        padding: 0.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+
+            .img-container {
+                width: 100%;
+                padding-top: 100%; // Square aspect ratio
+                position: relative;
+                overflow: hidden;
+                border-radius: 8px;
+                height: 400px;
+
+                img {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.3s ease;
+                }
+
+                &:hover img {
+                    transform: scale(1.05);
+                }
+            }
+
+            .product-info {
+                margin-top: 0.5rem;
+                text-align: center;
+
+                .product-name {
+                    font-size: 1rem;
+                    font-weight: 500;
+                    color: #555;
+                    margin-bottom: 0.25rem;
+                }
+
+                .product-price {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    color: #000;
+                }
+            }
+        }
+
+
+        
+    }
+
+    // Custom arrow styling
+    .similar-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.3s ease;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+    }
+
+    .prev {
+        left: -1rem;
+    }
+
+    .next {
+        right: -1rem;
+    }
+}

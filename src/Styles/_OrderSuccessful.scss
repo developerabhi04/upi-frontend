@@ -1,0 +1,155 @@
+@use "sass:color";
+
+// 🎨 Color Variables
+$primary-color: #28a745;
+$white: #fff;
+$bg-color: #121212;
+$button-bg: #c8102e;
+
+// 🎇 Main Container
+.order-success {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: radial-gradient(circle, rgba(18, 18, 18, 1) 50%, rgba(28, 28, 28, 1) 100%);
+    overflow: hidden;
+    text-align: center;
+
+    .success-box {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        z-index: 2;
+        animation: fadeIn 1s ease-in-out;
+        transition: transform 0.3s ease-in-out;
+
+        &:hover {
+            transform: scale(1.02);
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            color: $primary-color;
+            animation: popIn 0.5s ease-in-out;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: $white;
+            margin-top: 0.5rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #ddd;
+            margin: 1rem 0;
+        }
+
+        .home-button {
+            background: linear-gradient(135deg, $button-bg, $button-bg) !important;
+            color: $white !important;
+            padding: 0.75rem 1.5rem !important;
+            font-size: 1rem !important;
+            border-radius: 50px;
+            transition: all 0.4s ease-in-out;
+            position: relative;
+            overflow: hidden;
+
+            &:hover {
+                background: $button-bg;
+                transform: scale(1.05);
+            }
+
+            &::before {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.3);
+                top: 0;
+                left: -100%;
+                transition: all 0.4s ease-in-out;
+            }
+
+            &:hover::before {
+                left: 100%;
+            }
+        }
+    }
+
+    // ✨ Glitter Animation
+    .glitter-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: url("https://media.giphy.com/media/l41YtZOb9EUABnuqA/giphy.gif") repeat;
+        opacity: 0;
+        animation: glitterFade 2s forwards;
+    }
+}
+
+// 🎉 Animations
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    80% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes glitterFade {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0.3;
+    }
+}
+
+// 📱 Responsive Design
+@media (max-width: 768px) {
+    .order-success {
+        .success-box {
+            width: 90%;
+            padding: 1.5rem;
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .home-button {
+                font-size: 0.9rem;
+            }
+        }
+    }
+}

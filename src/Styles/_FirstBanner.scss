@@ -1,0 +1,504 @@
+// 1st
+.first-banner {
+    // border: 1px solid red;
+    margin-top: 6rem;
+    margin-bottom: 6rem;
+    // margin: auto;
+
+    .container {
+        // border: 1px solid red;
+        display: flex;
+        justify-content: center;
+        // align-items: center;
+        // gap: 2rem;
+        width: 80%;
+        margin: auto;
+
+        .img-one {
+            border-radius: 7px;
+            width: 50%;
+            position: relative;
+            // margin: auto;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: auto;
+                display: block;
+                position: relative;
+                z-index: 0;
+            }
+        }
+    }
+}
+
+// 2nd
+
+.second-banner {
+    margin-top: 4rem;
+    margin-bottom: 6rem;
+
+    > h1 {
+        text-align: center;
+        margin-bottom: 3rem;
+        font-size: 2.5rem;
+        font-weight: 600;
+        padding: 0 1rem; // Add horizontal padding for smaller screens
+    }
+
+    .second-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        width: 90%;
+        max-width: 1300px;
+        margin: auto;
+
+        .second-img-one {
+            width: 100%;
+
+            > img {
+                width: 100%;
+                height: auto;
+                display: block;
+                position: relative;
+                z-index: 0;
+            }
+
+            .content-one {
+                margin-top: 1rem;
+                padding: 0.5rem; // Add padding around content
+
+                > h1 {
+                    font-size: 1.5rem;
+                    margin-top: 0.5rem;
+                }
+
+                > p {
+                    margin-top: 0.5rem;
+                    font-weight: 400;
+                    font-size: 0.9rem;
+                    line-height: 1.4; // Improve readability
+                }
+
+                .content-button {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+
+                    > button {
+                        text-transform: uppercase;
+                        margin-top: 0.5rem;
+                        border: 1px solid rgb(16, 15, 15);
+                        padding: 0.75rem;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        background: #fff;
+                        color: #000;
+                        cursor: pointer;
+                        letter-spacing: 1px;
+                        border-radius: 3px;
+                        transition: all 0.3s ease;
+
+                        &:hover {
+                            background: #000;
+                            color: white;
+                        }
+
+                        &:nth-child(2) {
+                            background: #000;
+                            color: white;
+
+                            &:hover {
+                                background: #fff;
+                                color: #000;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //Tablet styles
+    @media (max-width: 1024px) {
+        .second-container {
+            width: 95%; // Ensure content fits the screen
+            flex-direction: row; // Keep images side by side if there's enough space
+            flex-wrap: wrap; // Allows images to wrap onto the next line if needed
+            justify-content: space-around; // Distribute images evenly
+        }
+
+        .second-img-one {
+            width: 45%; // Adjust image size for tablet
+        }
+    }
+
+    @media (max-width: 768px) {
+        .second-container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .second-img-one {
+            width: 90%; // Take up most of the screen width
+        }
+
+        > h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        margin-top: 3rem;
+        margin-bottom: 4rem;
+
+        > h1 {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .second-container {
+            width: 95%;
+
+            .second-img-one {
+                .content-one {
+                    > h1 {
+                        font-size: 1.2rem;
+                    }
+
+                    > p {
+                        font-size: 0.8rem;
+                    }
+
+                    .content-button {
+                        > button {
+                            font-size: 0.7rem;
+                            padding: 0.5rem;
+                        }
+
+                        > button:nth-child(2) {
+                            margin: 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.third-banner {
+    // General Styles
+    font-family: sans-serif;
+    margin-bottom: 2rem;
+    padding: 0 1rem; // Add a default horizontal padding
+    margin: 2rem auto; // Center banner
+
+    .container {
+        max-width: 1300px; // Overall width control
+        margin: 0 auto; // Center contents horizontally
+        overflow: hidden; // Prevent overflow
+
+        > img {
+            width: 100%;
+            display: block; // Eliminates extra space below images
+        }
+
+        // "New to the Website" Section
+        .new-to-website {
+            background: #f0eeeeb4;
+            padding: 2rem 1rem; // Adjusted padding
+            margin-top: 1.5rem; // Reduced Margin
+            margin-bottom: 1.5rem;
+            text-align: center;
+
+            .row {
+                display: flex;
+                flex-wrap: wrap; // Allow items to wrap to next line
+                justify-content: space-around; // Spread out items
+
+                > div {
+                    flex: 1 1 30%; // Base width with flex grow and shrink
+                    margin-bottom: 1rem; // Spacing between items
+                    text-align: center;
+
+                    > h2 {
+                        font-size: 1rem; // Adjust font for small screens
+                    }
+
+                    &:nth-child(2) {
+                        font-size: 1rem;
+                    }
+
+                    &:nth-child(3) {
+                        flex: 1 1 20%;
+
+                        > button {
+                            padding: 0.75rem 1rem; // Adjust button padding
+                            font-size: 0.7rem; // Adjust button font size
+                        }
+                    }
+                }
+            }
+        }
+
+        // "Bags Content" Section
+        .bags-content {
+            margin-top: 2rem;
+            text-align: center;
+
+            > h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            > p {
+                font-size: 1rem;
+                line-height: 1.4; // Better readability
+                margin-bottom: 1rem;
+            }
+
+            > button {
+                padding: 0.8rem 1.2rem; // Adjusted
+                font-size: 0.9rem; // Adjusted
+                border: 1px solid black;
+                border-radius: 5px;
+                background: white;
+                cursor: pointer;
+                transition: all 0.3s;
+
+                &:hover {
+                    background: black;
+                    color: white;
+                }
+            }
+        }
+
+        // Image with overlaying content section
+        .img3 {
+            position: relative; // For absolute positioning
+            margin-top: 3rem;
+
+            > img {
+                width: 100%;
+                display: block;
+            }
+
+            .contents {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+                color: white;
+                width: 90%; // Adjust width
+                padding: 1rem;
+                background-color: rgba(0, 0, 0, 0.5); // Add a backdrop
+
+                h1 {
+                    font-size: 1.8rem; // Adjust size
+                    margin-bottom: 0.5rem;
+                }
+
+                p {
+                    font-size: 1rem;
+                    margin-bottom: 1rem;
+                }
+
+                button {
+                    padding: 0.8rem 1.2rem; // Adjusted
+                    font-size: 0.9rem; // Adjusted
+                    border: 1px solid white;
+                    background: transparent;
+                    color: white;
+                    border-radius: 5px;
+                    transition: all 0.3s;
+
+                    &:hover {
+                        background: white;
+                        color: black;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Media Queries */
+    @media (max-width: 1200px) {
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .container {
+            width: auto;
+            margin: 0 auto;
+        }
+
+        .new-to-website {
+            padding: 1.5rem;
+
+            .row > div > h2 {
+                font-size: 0.9rem;
+            }
+        }
+
+        .bags-content {
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            p {
+                font-size: 0.9rem;
+            }
+        }
+
+        .img3 .contents h1 {
+            font-size: 1.5rem;
+        }
+
+        .img3 .contents p {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            width: 100%;
+            .img3 {
+
+                width: 100%;
+                display: block;
+
+                >img{
+                    height: 200px;
+                }
+                .contents {
+                    > h1 {
+                        font-size: 1rem;
+                    }
+
+                    > p {
+                        font-size: 0.8rem;
+                    }
+
+                    > button {
+                        padding: 0.8rem 1rem;
+                    }
+                }
+            }
+        }
+        .new-to-website .row > div {
+            margin-bottom: 0.5rem;
+        }
+
+        .new-to-website .row > div > button {
+            font-size: 0.7rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .bags-content {
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            p {
+                font-size: 0.8rem;
+            }
+        }
+
+        .img3 .contents h1 {
+            font-size: 1.3rem;
+        }
+
+        .img3 .contents p {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .new-to-website .row > div {
+            flex-basis: 100%;
+        }
+
+        .new-to-website .row > div:nth-child(2) {
+            width: 100%;
+        }
+
+        .new-to-website .row > div:nth-child(3) {
+            width: 100%;
+        }
+
+        .bags-content {
+            h1 {
+                font-size: 1rem;
+            }
+
+            p {
+                font-size: 0.7rem;
+            }
+        }
+
+        .img3 .contents h1 {
+            font-size: 1.1rem;
+        }
+
+        .img3 .contents p {
+            font-size: 0.6rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            width: 100%;
+            .img3 {
+
+                width: 100%;
+                display: block;
+
+                >img{
+                    height: 200px;
+                }
+                .contents {
+                    > h1 {
+                        font-size: 1rem;
+                    }
+
+                    > p {
+                        font-size: 0.8rem;
+                    }
+
+                    > button {
+                        padding: 0.8rem 1rem;
+                    }
+                }
+            }
+        }
+
+        .new-to-website .row > div {
+            flex-basis: 100%;
+            width: auto;
+
+            > button {
+                padding: 0.5rem 0.65rem;
+            }
+
+            > h2 {
+                font-size: 0.7rem;
+                margin: auto;
+                width: 200px;
+            }
+        }
+
+        .img3 .contents h1 {
+            font-size: 0.7rem;
+        }
+
+        .img3 .contents p {
+            font-size: 0.4rem;
+        }
+    }
+}

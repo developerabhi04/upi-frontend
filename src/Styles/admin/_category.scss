@@ -1,0 +1,94 @@
+.admin-container {
+    // display: flex;
+    // background-color: white;
+}
+
+.category-containers {
+    background-color: white;
+    flex-grow: 1;
+    padding: 1rem 8rem;
+
+    .category-section {
+        background-color: white;
+        
+
+    }
+
+    h2 {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+
+        input,
+        select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+
+            &:hover {
+                background-color: #218838;
+            }
+        }
+    }
+
+    .category-list,
+    .subcategory-list {
+        list-style: none;
+        padding: 0;
+
+
+
+        li {
+            border-bottom: 1px solid #b0b0b0;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #aff5b4;
+            margin: 5px 0;
+            border-radius: 5px;
+
+            .actions {
+                display: flex;
+                gap: 10px;
+
+                .edit-icon {
+                    cursor: pointer;
+                    color: #007bff;
+
+                    &:hover {
+                        color: #0056b3;
+                    }
+                }
+
+                .delete-icon {
+                    cursor: pointer;
+                    color: #dc3545;
+
+                    &:hover {
+                        color: #c82333;
+                    }
+                }
+            }
+        }
+    }
+
+    .error {
+        color: red;
+        font-size: 14px;
+    }
+}

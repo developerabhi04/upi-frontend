@@ -1,0 +1,344 @@
+@use "sass:color";
+
+$order-bg: #f8f8f8;
+$order-card-bg: #fff;
+$white: #fff;
+$order-header-color: #333;
+$order-text-color: #555;
+$order-accent-color: #c8102e;
+$order-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$order-transition: 0.3s;
+
+.order-details-page {
+    background-color: $order-bg;
+    padding: 8rem 0;
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+
+        .order-header {
+            text-align: center;
+            margin-bottom: 2rem;
+
+            h1 {
+                font-size: 2rem;
+                color: $order-header-color;
+                margin-bottom: 0.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+                color: $order-text-color;
+            }
+        }
+
+        .order-overview {
+            display: flex;
+            justify-content: space-between;
+            background-color: $order-card-bg;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: $order-box-shadow;
+            margin-bottom: 2rem;
+
+            .overview-item {
+                flex: 1;
+
+                p {
+                    font-size: 1rem;
+                    padding: 0.3rem;
+                    color: $order-text-color;
+
+                    strong {
+                        color: $order-header-color;
+                    }
+
+                    .status {
+                        font-weight: bold;
+                        text-transform: capitalize;
+
+                        &.delivered {
+                            color: green;
+                        }
+
+                        &.in-progress {
+                            color: orange;
+                        }
+
+                        &.canceled {
+                            color: red;
+                        }
+                    }
+                }
+            }
+        }
+
+        .order-tracking {
+            margin-bottom: 2rem;
+
+            h2 {
+                font-size: 1.5rem;
+                color: $order-header-color;
+                margin-bottom: 1rem;
+            }
+
+            .MuiStepper-root {
+                background-color: transparent;
+
+                .MuiStepLabel-label {
+                    font-size: 1rem;
+                    color: $order-text-color;
+
+                    &.Mui-active {
+                        font-weight: bold;
+                        color: $order-accent-color;
+                    }
+                }
+
+                .MuiStepConnector-line {
+                    border-color: $order-accent-color;
+                }
+
+                .MuiStepIcon-root {
+                    color: $order-accent-color;
+
+                    &.Mui-active {
+                        color: $order-accent-color;
+                    }
+
+                    &.Mui-completed {
+                        color: green;
+                    }
+                }
+            }
+        }
+
+        .product-details {
+            background-color: $order-card-bg;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: $order-box-shadow;
+            margin-bottom: 2rem;
+
+            h2 {
+                font-size: 1.5rem;
+                color: $order-header-color;
+                margin-bottom: 1rem;
+            }
+
+            .product-list {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+
+                .product-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+
+                    .product-image {
+                        cursor: pointer;
+                        margin-bottom: 10rem;
+                        display: contents;
+
+                        img {
+                            width: 100px;
+                            height: 123px;
+                            border-radius: 8px;
+                            object-fit: cover;
+                        }
+                    }
+
+                    .product-info {
+                        flex-grow: 1;
+
+                        h5 {
+                            font-size: 1rem;
+                            color: $order-header-color;
+                            margin-bottom: 0.3rem;
+                        }
+
+                        p {
+                            font-size: 0.9rem;
+                            color: $order-text-color;
+                        }
+                    }
+                }
+            }
+        }
+
+        .payment-details {
+            background-color: $order-card-bg;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: $order-box-shadow;
+            margin-bottom: 2rem;
+
+            h2 {
+                font-size: 1.5rem;
+                color: $order-header-color;
+                margin-bottom: 1rem;
+            }
+
+            .summary-item {
+                display: flex;
+                justify-content: space-between;
+                font-size: 1rem;
+                color: $order-text-color;
+
+                &.total {
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    color: $order-header-color;
+                }
+            }
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+
+            button {
+                background-color: $order-accent-color;
+                color: $white;
+                padding: 0.8rem 1.5rem;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 1rem;
+                transition: background-color $order-transition;
+
+                &:hover {
+                    background-color: #c8102e;
+                }
+
+                &.cancel-order {
+                    background-color: red;
+
+                    &:hover {
+                        background-color: red;
+                    }
+                }
+
+                &:nth-last-child(1) {
+                    background-color: rgb(9, 110, 218);
+
+                    &:hover {
+                        background-color: color.scale(red, $lightness: -10%);
+                    }
+                }
+            }
+        }
+    }
+}
+
+.review-section {
+    max-width: 600px;
+    margin: 2rem auto;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-align: center;
+
+    h2 {
+        font-size: 1.75rem;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .review-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .rating-input {
+            display: flex;
+            justify-content: center;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+
+            &:focus {
+                border-color: #007bff;
+                outline: none;
+            }
+        }
+
+        button {
+            align-self: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+
+            &:hover {
+                background: #218838;
+            }
+        }
+    }
+
+    .reviews-list {
+        margin-top: 2rem;
+
+        h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .review-item {
+            border-top: 1px solid #e0e0e0;
+            padding: 1rem 0;
+
+            &:first-child {
+                border-top: none;
+            }
+
+            .review-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.5rem;
+
+                .review-user {
+                    font-weight: 600;
+                    color: #007bff;
+                }
+            }
+
+            .review-comment {
+                font-size: 1rem;
+                color: #555;
+                margin-bottom: 0.5rem;
+            }
+
+            .review-date {
+                font-size: 0.85rem;
+                color: #888;
+            }
+        }
+
+        .error {
+            color: #d9534f;
+            margin-top: 1rem;
+            text-align: center;
+        }
+    }
+}

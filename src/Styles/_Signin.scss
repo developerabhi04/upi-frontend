@@ -1,0 +1,178 @@
+@use "sass:color";
+
+// Variables
+$primary-color: #c8102e;
+$secondary-color: #333;
+$bg-color: #f8f8f8;
+$white: #fff;
+$transition-speed: 0.3s;
+$border-radius: 8px;
+
+.signin-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $bg-color;
+    padding: 1rem;
+}
+
+.signin-card {
+    background: $white;
+    padding: 2rem;
+    border-radius: $border-radius;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+
+    h2 {
+        margin-bottom: 1.5rem;
+        color: $secondary-color;
+        font-size: 2rem;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+
+        .form-group {
+            margin-bottom: 1rem;
+            text-align: left;
+
+            label {
+                display: block;
+                margin-bottom: 0.5rem;
+                color: $secondary-color;
+                font-size: 0.9rem;
+            }
+
+            input {
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid #ddd;
+                border-radius: $border-radius;
+                font-size: 1rem;
+                transition: border $transition-speed;
+
+                &:focus {
+                    outline: none;
+                    border-color: $primary-color;
+                }
+            }
+        }
+
+        .form-actions {
+            margin-top: 1rem;
+
+            .signin-btn {
+                width: 100%;
+                padding: 0.75rem;
+                background: $primary-color;
+                color: $white;
+                border: none;
+                border-radius: $border-radius;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background $transition-speed;
+
+                &:hover {
+                    background: color.adjust($primary-color, $lightness: -5%);
+                }
+            }
+        }
+
+        .form-footer {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: $secondary-color;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+
+            a {
+                color: $primary-color;
+                text-decoration: none;
+                transition: color $transition-speed;
+
+                &:hover {
+                    color: color.adjust($primary-color, $lightness: -10%);
+                }
+            }
+        }
+    }
+
+    .google-signin {
+        margin-top: 1.5rem;
+
+        .google-btn {
+            width: 100%;
+            padding: 0.45rem;
+            // background: $white;
+            color: white;
+            background-color: #3e7df2;
+            border: 1px solid #ddd;
+            border-radius: $border-radius;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: background $transition-speed, border $transition-speed;
+
+            svg {
+                background-color: #fff;
+                font-size: 2rem;
+
+            }
+
+            &:hover {
+                background-color: #fff;
+                color: #3e7df2;
+            }
+
+            >span {
+                width: 100%;
+                text-align: center
+            }
+        }
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .signin-card {
+        padding: 1.5rem;
+
+        h2 {
+            font-size: 1.8rem;
+        }
+
+        form {
+            .form-group {
+                input {
+                    padding: 0.65rem;
+                    font-size: 0.9rem;
+                }
+            }
+
+            .form-actions {
+                .signin-btn {
+                    padding: 0.65rem;
+                    font-size: 0.9rem;
+                }
+            }
+        }
+
+        .google-signin {
+            .google-btn {
+                padding: 0.65rem;
+                font-size: 0.9rem;
+            }
+        }
+    }
+}

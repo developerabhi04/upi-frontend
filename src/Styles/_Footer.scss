@@ -1,0 +1,614 @@
+.footer-section {
+    background-color: #f0f0f0;
+    color: #53565a;
+    padding: 1rem;
+    // margin-top: 2rem;
+    font-family: 'Arial', sans-serif;
+    width: 100%;
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: space-between;
+
+        // Common styles for all footer sections
+        [class^="footer-"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 1rem;
+
+            h1 {
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-weight: 500;
+                margin-bottom: 1.5rem;
+                padding-bottom: 0.5rem;
+                color: #191919;
+
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+
+                li {
+                    margin-bottom: 1rem;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                    font-weight: 400;
+                    font-size: 0.9rem;
+
+                    &:hover {
+                        color: #c8102e;
+                        transform: translateY(5px);
+                    }
+                }
+            }
+        }
+
+        // Get in Touch specific styles
+        .footer-get-in-touch {
+            ul li {
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                margin-bottom: 1.5rem;
+
+                .MuiSvgIcon-root {
+                    font-size: 1.5rem;
+                    color: #ff4d4d;
+                    flex-shrink: 0;
+                }
+
+                span {
+
+                    font-size: 0.9rem;
+                    line-height: 1.5;
+                }
+            }
+        }
+
+
+        .footer-categories {
+            ul li {
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                margin-bottom: 1.5rem;
+
+                >a {
+                    text-decoration: none;
+                    display: flex;
+                    justify-content: center;
+                    align-content: center;
+                    align-items: center;
+                    color: #53565a;
+                    gap: 0.4rem;
+
+
+                    &:hover {
+                        color: #ff4d4d;
+                    }
+
+                    span {
+
+                        font-size: 0.9rem;
+                        line-height: 1.5;
+                    }
+
+
+                }
+
+
+
+            }
+        }
+
+        // Follow Us specific styles
+        .footer-follow-us {
+            ul li {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+
+
+                .MuiSvgIcon-root {
+                    font-size: 1.5rem;
+                    transition: all 0.3s ease;
+                }
+
+                &:hover {
+                    .MuiSvgIcon-root {
+                        color: #ff4d4d;
+                    }
+                }
+
+                span {
+                    font-size: 0.9rem;
+                }
+
+            }
+
+            ul {
+
+                li {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+
+                    a {
+                        text-decoration: none;
+                        display: flex;
+                        justify-content: center;
+                        align-content: center;
+                        align-items: center;
+                        color: #53565a;
+                        gap: 0.4rem;
+
+                        .MuiSvgIcon-root {
+                            font-size: 1.3rem;
+                            transition: all 0.3s ease;
+                        }
+
+                        &:hover {
+                            .MuiSvgIcon-root {
+                                color: #ff4d4d;
+                            }
+                        }
+
+                        span {
+                            font-size: 0.9rem;
+                        }
+                    }
+                }
+            }
+        }
+
+        .footer-policy {
+
+            >ul {
+
+                >li {
+
+                    >a {
+                        margin-bottom: 1rem;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        font-weight: 400;
+                        font-size: 0.83rem;
+                        color: #53565a;
+
+                        &:hover {
+                            color: #c8102e;
+                            transform: translateY(5px);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+    }
+
+    // Copyright section (you can add this if needed)
+    .footer-copyright {
+        width: 1200px;
+        margin: auto;
+        text-align: center;
+        padding: 1rem;
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: #989292;
+
+        .footers-container {
+            // border: 1px solid red;
+            display: flex;
+            width: 100%;
+            // font-size: 1rem;
+
+
+
+            // footer-right
+            .footer-copyright-right {
+                // border: 1px solid red;
+                display: flex;
+                justify-content: flex-end;
+                width: 100%;
+                align-items: center;
+
+
+                >p {
+                    margin-right: 0.5rem;
+
+                }
+
+                >ul {
+                    display: flex;
+                    // justify-content: center;
+                    align-items: center;
+                    list-style: none;
+
+                    >li {
+                        display: flex;
+                        justify-content: center;
+                        // margin: -26px;
+
+                        >img {
+                            width: 100%;
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .footer-copyright-left {
+        background-color: #989292;
+    }
+
+
+}
+
+
+
+footer {
+    background: #d8d8d8;
+    text-align: center;
+    padding: 0.1rem;
+
+    .footer-copyright {
+
+        >p {
+            color: #868383;
+        }
+    }
+}
+
+
+
+@media (max-width: 1025px) {
+    .footer-section {
+        background-color: #f0f0f0;
+        color: #53565a;
+        padding: 1rem;
+        margin-top: 2rem;
+        font-family: 'Arial', sans-serif;
+
+
+        .footer-container {
+            // max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: space-between;
+
+            // Common styles for all footer sections
+            [class^="footer-"] {
+                flex: 1;
+                min-width: 250px;
+                padding: 1rem;
+
+                h1 {
+                    font-size: 1rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    font-weight: 500;
+                    margin-bottom: 1.5rem;
+                    padding-bottom: 0.5rem;
+                    color: #191919;
+
+                }
+
+                ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+
+                    li {
+                        margin-bottom: 1rem;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        font-weight: 400;
+                        font-size: 0.9rem;
+
+                        &:hover {
+                            color: #c8102e;
+                            transform: translateY(5px);
+                        }
+                    }
+                }
+            }
+
+            // Get in Touch specific styles
+            .footer-get-in-touch {
+                ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.3rem;
+                    margin-bottom: 1.5rem;
+
+                    .MuiSvgIcon-root {
+                        font-size: 1.5rem;
+                        color: #ff4d4d;
+                        flex-shrink: 0;
+                    }
+
+                    span {
+
+                        font-size: 0.9rem;
+                        line-height: 1.5;
+                    }
+                }
+            }
+
+            // Follow Us specific styles
+            .footer-follow-us {
+                ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+
+                    .MuiSvgIcon-root {
+                        font-size: 1.5rem;
+                        transition: all 0.3s ease;
+                    }
+
+                    &:hover {
+                        .MuiSvgIcon-root {
+                            color: #ff4d4d;
+                        }
+                    }
+
+                    span {
+                        font-size: 0.9rem;
+                    }
+                }
+            }
+
+
+
+        }
+
+        // Copyright section (you can add this if needed)
+        .footer-copyright {
+            // width: 1200px;
+            width: 100%;
+
+            .footers-container {
+
+                // footer-right
+                .footer-copyright-right {
+                    // border: 1px solid red;
+
+
+
+                    >p {
+                        margin-right: 0.5rem;
+
+                    }
+
+                    >ul {
+
+
+                        >li {
+
+
+                            >img {
+                                width: 50%;
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+    }
+
+}
+
+@media (max-width: 768px) {
+    .footer-section {
+        width: 760px;
+    }
+
+
+    footer {
+        width: 760px;
+
+
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-section {
+        background-color: #f0f0f0;
+        color: #53565a;
+        padding: 0.1rem;
+        margin-top: 0rem;
+        font-family: 'Arial', sans-serif;
+        width: 100%;
+
+        .footer-container {
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+
+            gap: 2rem;
+            justify-content: space-between;
+
+            // Common styles for all footer sections
+            [class^="footer-"] {
+                flex: 1;
+                min-width: 250px;
+                padding: 1rem;
+
+                h1 {
+                    font-size: 1rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    font-weight: 500;
+                    margin-bottom: 1.5rem;
+                    padding-bottom: 0.5rem;
+                    color: #191919;
+
+                }
+
+                ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+
+                    li {
+                        margin-bottom: 1rem;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        font-weight: 400;
+                        font-size: 0.9rem;
+
+                        &:hover {
+                            color: #c8102e;
+                            transform: translateY(5px);
+                        }
+                    }
+                }
+            }
+
+            // Get in Touch specific styles
+            .footer-get-in-touch {
+                ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.3rem;
+                    margin-bottom: 1.5rem;
+
+                    .MuiSvgIcon-root {
+                        font-size: 1.5rem;
+                        color: #ff4d4d;
+                        flex-shrink: 0;
+                    }
+
+                    span {
+
+                        font-size: 0.9rem;
+                        line-height: 1.5;
+                    }
+                }
+            }
+
+            // Follow Us specific styles
+            .footer-follow-us {
+                ul li {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+
+                    .MuiSvgIcon-root {
+                        font-size: 1.5rem;
+                        transition: all 0.3s ease;
+                    }
+
+                    &:hover {
+                        .MuiSvgIcon-root {
+                            color: #ff4d4d;
+                        }
+                    }
+
+                    span {
+                        font-size: 0.9rem;
+                    }
+                }
+            }
+
+
+
+        }
+
+        // Copyright section (you can add this if needed)
+        .footer-copyright {
+            // width: 100%;
+            margin: auto;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #989292;
+
+            .footers-container {
+                // border: 1px solid red;
+                display: flex;
+                width: 100%;
+                // font-size: 1rem;
+
+
+
+                // footer-right
+                .footer-copyright-right {
+                    // border: 1px solid red;
+                    display: flex;
+                    justify-content: flex-end;
+                    width: 100%;
+                    align-items: center;
+
+
+                    >p {
+                        margin-right: 0.5rem;
+
+                    }
+
+                    >ul {
+                        display: flex;
+                        // justify-content: center;
+                        align-items: center;
+                        list-style: none;
+
+                        >li {
+                            display: flex;
+                            align-items: center;
+                            // justify-content: center;
+                            // margin: -26px;
+
+                            >img {
+                                width: 40%;
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .footer-copyright-left {
+            background-color: #989292;
+        }
+
+
+    }
+
+
+
+    footer {
+        background: #d8d8d8;
+        text-align: center;
+        padding: 1rem;
+        width: 100%;
+
+        .footer-copyright {
+
+            >p {
+                color: #868383;
+            }
+        }
+    }
+}

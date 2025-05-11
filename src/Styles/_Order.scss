@@ -1,0 +1,193 @@
+@use "sass:color";
+
+
+$order-bg: #f8f8f8;
+$order-card-bg: #fff;
+$order-header-color: #333;
+$order-text-color: #555;
+$order-accent-color: #c8102e;
+$order-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$order-transition: 0.3s;
+
+.order-page {
+    background-color: $order-bg;
+    padding: 7rem 0;
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+
+        .order-header {
+            text-align: center;
+            margin-bottom: 2rem;
+
+            h1 {
+                font-size: 2rem;
+                color: $order-header-color;
+                margin-bottom: 0.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+                color: $order-text-color;
+            }
+        }
+
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+
+            .order-card {
+                background-color: $order-card-bg;
+                padding: 1.5rem;
+                border-radius: 8px;
+                box-shadow: $order-box-shadow;
+                transition: transform $order-transition;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+
+                &:hover {
+                    transform: translateY(-5px);
+                }
+
+                .order-header-info {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+
+                    .order-info {
+                        h3 {
+                            font-size: 1.2rem;
+                            color: $order-header-color;
+                            margin-bottom: 0.5rem;
+                        }
+
+                        p {
+                            font-size: 0.9rem;
+                            color: $order-text-color;
+
+                            .status {
+                                font-weight: bold;
+                                text-transform: capitalize;
+
+                                &.delivered {
+                                    color: green;
+                                }
+
+                                &.in-progress {
+                                    color: orange;
+                                }
+
+                                &.canceled {
+                                    color: red;
+                                }
+                            }
+                        }
+                    }
+
+                    .view-details-btn {
+                        button {
+                            background-color: $order-accent-color;
+                            color: white;
+                            padding: 0.5rem 1rem;
+                            border: none;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            transition: background-color $order-transition;
+
+                            &:hover {
+                                background-color: #c8102e;
+                            }
+                        }
+                    }
+                }
+
+                .order-summary {
+                    p {
+                        font-size: 1rem;
+                        font-weight: bold;
+                        color: $order-header-color;
+                    }
+                }
+
+                .order-details {
+                    h4 {
+                        font-size: 1.2rem;
+                        margin-bottom: 1rem;
+                        color: $order-header-color;
+                    }
+
+                    .product-list {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1.5rem;
+
+                        .product-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 1rem;
+                            padding: 1rem;
+                            background-color: $order-bg;
+                            border-radius: 8px;
+
+                            .product-image {
+                                img {
+                                    width: 100px;
+                                    height: 123px;
+                                    border-radius: 8px;
+                                    object-fit: cover;
+                                }
+                            }
+
+                            .product-info {
+                                flex-grow: 1;
+
+                                h5 {
+                                    font-size: 1rem;
+                                    color: $order-header-color;
+                                    margin-bottom: 0.3rem;
+                                }
+
+                                p {
+                                    font-size: 0.9rem;
+                                    color: $order-text-color;
+                                }
+                            }
+
+                            .product-price {
+                                font-size: 1rem;
+                                font-weight: bold;
+                                color: $order-header-color;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            .orders-list {
+                .order-card {
+                    .order-header-info {
+                        flex-direction: column;
+                        align-items: flex-start;
+
+                        .view-details-btn {
+                            margin-top: 0.5rem;
+                            align-self: flex-start;
+                        }
+                    }
+
+                    .product-list {
+                        flex-direction: column;
+                    }
+                }
+            }
+        }
+    }
+}
