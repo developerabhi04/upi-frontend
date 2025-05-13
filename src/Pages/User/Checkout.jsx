@@ -21,32 +21,47 @@ import { toast } from "react-toastify";
 import phonePeLogo from "../../assets/payment/phonepe-logo-icon.webp";
 import paytmLogo from "../../assets/payment/unnamed.png";
 
-import { fetchPaymentConfigs } from "../../redux/slices/paymentSlices.js";
-import { validateCoupon } from "../../redux/slices/couponSlices";
-import { createNewOrder } from "../../redux/slices/orderSlices";
-import { clearOrderedProducts } from "../../redux/slices/cartSlices";
 
-const buildUpiDeepLink = ({ payeeVpa, payeeName, amount, txnId }) =>
-  `upi://pay?pa=${encodeURIComponent(payeeVpa)}` +
-  `&pn=${encodeURIComponent(payeeName)}` +
-  `&am=${encodeURIComponent(amount)}` +
-  `&cu=INR&tr=${encodeURIComponent(txnId)}`;
+import { validateCoupon } from "../../redux/slices/couponSlices.js";
+import { createNewOrder } from "../../redux/slices/orderSlices.js";
+import { clearOrderedProducts } from "../../redux/slices/cartSlices.js";
+import { fetchPaymentConfigs } from "../../redux/slices/paymentSlices.js";
+
+const buildDeepLink = ({ method, payeeVpa, payeeName, amount, txnId }) => {
+  let baseScheme = "upi://pay";
+
+  if (method === "UPI-PhonePe") {
+    baseScheme = "phonepe://upi/pay";
+  } else if (method === "UPI-Paytm") {
+    baseScheme = "paytmmp://pay";
+  }
+
+  return (
+    `${baseScheme}` +
+    `?pa=${encodeURIComponent(payeeVpa)}` +
+    `&pn=${encodeURIComponent(payeeName)}` +
+    `&am=${encodeURIComponent(amount)}` +
+    `&cu=INR` +
+    `&tr=${encodeURIComponent(txnId)}`
+  );
+};
 
 const Checkout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { state } = useLocation();
 
   // Cart & User
-  const cartItems = location.state?.cartItems || [];
-  const { user } = useSelector((state) => state.user);
+  const cartItems = state?.cartItems || [];
+  const { user } = useSelector((s) => s.user);
 
   // UPI configs
-  const { configs, loading: configLoading } = useSelector(
-    (state) => state.paymentConfig
+  const { configs, loading: configLoading,error } = useSelector(
+    (s) => s.paymentConfig
   );
+  console.log("Loaded UPI configs:", configs, "error:", error);
 
-  // Shipping form state
+  // Shipping form
   const [shipping, setShipping] = useState({
     fullName: "",
     address: "",
@@ -59,7 +74,6 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
 
   // Coupon
-  const { loading: couponLoading } = useSelector((s) => s.coupons);
   const [couponCode, setCouponCode] = useState("");
   const [discountedTotal, setDiscountedTotal] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -96,11 +110,12 @@ const Checkout = () => {
   };
 
   const placeOrder = async (paymentResult) => {
-    // Ensure shipping details
     const missing = Object.entries(shipping)
       .filter(([, v]) => !v.trim())
       .map(([k]) => k);
-    if (missing.length) return toast.error("Please fill all fields");
+    if (missing.length) {
+      return toast.error("Please fill all shipping fields");
+    }
 
     const orderData = {
       user: user._id,
@@ -130,20 +145,18 @@ const Checkout = () => {
     }
   };
 
-  // Kick off UPI payment flow
   const handlePay = () => {
     const cfg = configs.find((c) => c.method === method);
     if (!cfg) {
-      toast.error("Payment configuration not found");
-      return;
+      return toast.error("Payment configuration not found");
     }
     const txnId = `AT-${Date.now()}`;
 
-    // Step 1: confirm start
     if (!window.confirm(`Proceed to payment via ${method}?`)) return;
 
-    // Step 2: redirect into UPI app
-    const uri = buildUpiDeepLink({
+    // Redirect into the UPI app
+    const uri = buildDeepLink({
+      method,
       payeeVpa: cfg.payeeVpa,
       payeeName: cfg.payeeName,
       amount: total,
@@ -151,7 +164,7 @@ const Checkout = () => {
     });
     window.location.href = uri;
 
-    // Step 3: after user returns, confirm completion
+    // Ask user to confirm completion
     setTimeout(() => {
       if (window.confirm(`Did you complete payment via ${method}?`)) {
         placeOrder({ via: method, txnId });
@@ -162,11 +175,8 @@ const Checkout = () => {
   };
 
   return (
-    <Container
-      maxWidth="lg"
-      sx={{ mt: { xs: 2, md: 10 }, mb: { xs: 4, md: 10 } }}
-    >
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Container maxWidth="lg" sx={{ mt: { xs: 2, md: 10 }, mb: { xs: 4, md: 10 } }}>
+      <Typography variant="h4" gutterBottom>
         Checkout
       </Typography>
       <Grid container spacing={4}>
@@ -188,7 +198,7 @@ const Checkout = () => {
               ))}
 
               <FormControl component="fieldset">
-                <FormLabel component="legend">Select UPI Method</FormLabel>
+                <FormLabel>Select UPI Method</FormLabel>
                 <RadioGroup
                   row
                   value={method}
@@ -199,13 +209,7 @@ const Checkout = () => {
                     control={<Radio />}
                     label={
                       <Box display="flex" alignItems="center">
-                        <Box
-                          component="img"
-                          src={phonePeLogo}
-                          alt="PhonePe"
-                          width={24}
-                          mr={1}
-                        />
+                        <Box component="img" src={phonePeLogo} alt="PhonePe" width={24} mr={1} />
                         PhonePe
                       </Box>
                     }
@@ -215,13 +219,7 @@ const Checkout = () => {
                     control={<Radio />}
                     label={
                       <Box display="flex" alignItems="center">
-                        <Box
-                          component="img"
-                          src={paytmLogo}
-                          alt="Paytm"
-                          width={32}
-                          mr={1}
-                        />
+                        <Box component="img" src={paytmLogo} alt="Paytm" width={32} mr={1} />
                         Paytm
                       </Box>
                     }
@@ -246,11 +244,7 @@ const Checkout = () => {
                 <Typography>₹{tax.toFixed(2)}</Typography>
               </Box>
               {discountAmount > 0 && (
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  color="green"
-                >
+                <Box display="flex" justifyContent="space-between" color="green">
                   <Typography>Discount:</Typography>
                   <Typography>-₹{discountAmount.toFixed(2)}</Typography>
                 </Box>
@@ -265,15 +259,10 @@ const Checkout = () => {
                   placeholder="Coupon code"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
-                  disabled={couponLoading}
                   fullWidth
                 />
-                <Button
-                  variant="outlined"
-                  onClick={applyCoupon}
-                  disabled={couponLoading}
-                >
-                  {couponLoading ? "Applying..." : "Apply"}
+                <Button variant="outlined" onClick={applyCoupon}>
+                  Apply
                 </Button>
               </Stack>
 
