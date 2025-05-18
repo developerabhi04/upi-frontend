@@ -2,7 +2,7 @@ import PhonePeButton from './PhonePeButton';
 
 
 const Checkout = () => {
-  const amount = 4;
+  const amount = 1;
   const orderId = 'ORDER12345';
 
   return (
