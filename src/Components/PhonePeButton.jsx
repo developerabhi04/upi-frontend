@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { generateUpiDeeplink } from '../utils/UpiUtils';
+import { generateUpiDeeplink } from '../Utils/UpiUtils.js';
 import { server } from '../server.js';
 
 const API_URL = `${server}/payment/config`;
