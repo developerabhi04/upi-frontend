@@ -1,6 +1,7 @@
 import  { useState } from 'react';
+import { server } from '../server.js';
 
-const API_URL = 'http://localhost:5000/api/v1/payment/config';
+const API_URL = `${server}/payment/config`;
 
 const AdminVpaConfig = () => {
   const [payeeVpa, setPayeeVpa] = useState('');

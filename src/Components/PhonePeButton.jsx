@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { generateUpiDeeplink } from '../utils/UpiUtils';
+import { server } from '../server.js';
 
-const API_URL = 'http://localhost:5000/api/v1/payment/config';
+const API_URL = `${server}/payment/config`;
 
 const PhonePeButton = ({ amount, orderId }) => {
   const [config, setConfig] = useState(null);
