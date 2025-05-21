@@ -1,56 +1,73 @@
+// components/PhonePeButton.jsx
 import React, { useEffect, useState } from 'react';
 import { generateUpiDeeplink } from '../Utils/UpiUtils.js';
-import { server } from '../server.js';
-
-const API_URL = `${server}/payment/config`;
+import {server} from "../server.js"
 
 const PhonePeButton = ({ amount, orderId }) => {
   const [config, setConfig] = useState(null);
+  const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(API_URL)
-      .then(async res => {
-        const data = await res.json();
-        if (res.ok) {
-          setConfig(data);
-        } else {
-          setError(data.error || 'VPA not configured');
-        }
-      })
-      .catch(() => setError('Server unreachable'));
+    const checkConfig = async () => {
+      try {
+        const res = await fetch(`${server}/payment/verify-config`);
+        const { valid } = await res.json();
+        if (!valid) throw new Error('Merchant account not configured');
+        
+        const configRes = await fetch(`${server}/payment/config`);
+        setConfig(await configRes.json());
+      } catch (err) {
+        setError('Valid merchant account required');
+      }
+    };
+    checkConfig();
   }, []);
 
-  const handlePayment = () => {
-    if (!config) return;
-    const deeplink = generateUpiDeeplink({
-      vpa: config.payeeVpa,
-      name: config.payeeName,
-      amount,
-      note: `Order #${orderId}`
-    });
+  const handlePayment = async () => {
+    setStatus('processing');
+    try {
+      const deeplink = generateUpiDeeplink({
+        ...config,
+        amount,
+        note: `Order ${orderId}`,
+      });
 
-    // Try PhonePe first
-    window.location.href = deeplink.replace('upi://', 'phonepe://');
-
-    // Fallback after 800ms
-    setTimeout(() => {
       window.location.href = deeplink;
-    }, 800);
+      
+      // Check payment status every 5 seconds
+      const interval = setInterval(async () => {
+        const res = await fetch(`${server}/payment/status/${orderId}`);
+        const { status } = await res.json();
+        
+        if (status === 'success') {
+          clearInterval(interval);
+          setStatus('success');
+        }
+      }, 5000);
+
+    } catch (err) {
+      setStatus('error');
+      setError('Payment initiation failed');
+    }
   };
 
-  if (error) {
-    return <button disabled>{error}</button>;
-  }
-  if (!config) {
-    return <button disabled>Loading...</button>;
-  }
-
+  if (error) return <div className="error">{error}</div>;
+  
   return (
-    <button onClick={handlePayment}>
-      Pay ₹{amount} with PhonePe / UPI
-    </button>
+    <div>
+      <button 
+        onClick={handlePayment}
+        disabled={status === 'processing'}
+      >
+        {status === 'processing' ? 'Processing...' : `Pay ₹${amount}`}
+      </button>
+      
+      {status === 'success' && <div>Payment successful!</div>}
+      {status === 'error' && <div>Payment failed. Please try again.</div>}
+    </div>
   );
 };
+
 
 export default PhonePeButton;

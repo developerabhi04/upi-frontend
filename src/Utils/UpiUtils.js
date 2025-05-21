@@ -1,10 +1,15 @@
-export function generateUpiDeeplink({ vpa, name, amount, note }) {
+// utils/UpiUtils.js
+export function generateUpiDeeplink({ vpa, name, amount, note, mcc }) {
   const params = new URLSearchParams({
     pa: vpa,
     pn: name,
-    am: amount.toString(),
+    am: amount.toFixed(2),
     tn: note,
-    cu: 'INR'
+    cu: 'INR',
+    mc: mcc, // Mandatory for merchant accounts
+    tr: `TXN${Date.now()}`,
+    merchant: 'true'
   });
-  return `upi://pay?${params.toString()}`;
+  
+  return `phonepe://pay?${params.toString()}&redirectUrl=${encodeURIComponent(window.location.href)}`;
 }
