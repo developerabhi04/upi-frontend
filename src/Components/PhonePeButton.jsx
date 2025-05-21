@@ -1,7 +1,7 @@
-// components/PhonePeButton.jsx
-import React, { useEffect, useState } from 'react';
+// src/Components/PhonePeButton.jsx
+import { useEffect, useState } from 'react';
 import { generateUpiDeeplink } from '../Utils/UpiUtils.js';
-import {server} from "../server.js"
+import { server } from "../server.js";
 
 const PhonePeButton = ({ amount, orderId }) => {
   const [config, setConfig] = useState(null);
@@ -14,7 +14,6 @@ const PhonePeButton = ({ amount, orderId }) => {
         const res = await fetch(`${server}/payment/verify-config`);
         const { valid } = await res.json();
         if (!valid) throw new Error('Merchant account not configured');
-        
         const configRes = await fetch(`${server}/payment/config`);
         setConfig(await configRes.json());
       } catch (err) {
@@ -32,20 +31,8 @@ const PhonePeButton = ({ amount, orderId }) => {
         amount,
         note: `Order ${orderId}`,
       });
-
       window.location.href = deeplink;
-      
-      // Check payment status every 5 seconds
-      const interval = setInterval(async () => {
-        const res = await fetch(`${server}/payment/status/${orderId}`);
-        const { status } = await res.json();
-        
-        if (status === 'success') {
-          clearInterval(interval);
-          setStatus('success');
-        }
-      }, 5000);
-
+      // (Optional) Poll payment status here if you implement it server-side
     } catch (err) {
       setStatus('error');
       setError('Payment initiation failed');
@@ -53,7 +40,8 @@ const PhonePeButton = ({ amount, orderId }) => {
   };
 
   if (error) return <div className="error">{error}</div>;
-  
+  if (!config) return <button disabled>Loading...</button>;
+
   return (
     <div>
       <button 
@@ -62,12 +50,10 @@ const PhonePeButton = ({ amount, orderId }) => {
       >
         {status === 'processing' ? 'Processing...' : `Pay ₹${amount}`}
       </button>
-      
       {status === 'success' && <div>Payment successful!</div>}
       {status === 'error' && <div>Payment failed. Please try again.</div>}
     </div>
   );
 };
-
 
 export default PhonePeButton;
