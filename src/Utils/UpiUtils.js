@@ -1,35 +1,25 @@
+// Updated UpiUtils.js with IDFC workaround
 export const generateUpiLink = (config, amount, orderId, sessionId) => {
-  // Enhanced validation
-  if (!config || typeof config !== 'object') {
-    throw new Error('Configuration must be an object');
-  }
-
-  const requiredFields = ['payeeVpa', 'payeeName'];
-  for (const field of requiredFields) {
-    if (!config[field] || typeof config[field] !== 'string') {
-      throw new Error(`Missing or invalid ${field} in configuration`);
-    }
-  }
-
-  // Validate amount
-  if (isNaN(amount) || amount <= 0 || amount > 2000) {
-    throw new Error('Amount must be between ₹1 and ₹2000');
-  }
-
-  // Create UPI parameters
+  // Workaround for IDFC accounts
+  const isIdfcAccount = config.payeeVpa.endsWith('@idfcbank');
+  
   const params = new URLSearchParams({
-    pa: config.payeeVpa.trim(),
-    pn: encodeURIComponent(config.payeeName.trim().substring(0, 50)),
+    pa: config.payeeVpa,
+    pn: encodeURIComponent(config.payeeName),
     am: amount.toFixed(2),
-    tn: `Payment for order ${orderId}`.substring(0, 50),
-    mc: config.mcc || '6012', // Default MCC if not provided
+    tn: `Payment for ${orderId}`.substring(0, 50),
+    mc: isIdfcAccount ? '6012' : config.mcc, // Force MCC for IDFC
     tr: sessionId,
     cu: 'INR',
-    url: `${window.location.origin}/status/${sessionId}`
+    mode: isIdfcAccount ? '02' : '00', // Special mode for problematic accounts
+    orgid: isIdfcAccount ? '000393' : '000000' // IDFC bank org code
   });
 
   return {
     upiIntent: `upi://pay?${params.toString()}`,
-    fallbackUrl: `https://upilink.in/pay?${params.toString()}`
+    // Special PhonePe deep link for IDFC
+    phonePeLink: isIdfcAccount ? 
+      `phonepe://pay?${params.toString()}` : 
+      null
   };
 };

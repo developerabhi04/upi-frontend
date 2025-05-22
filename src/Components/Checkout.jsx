@@ -9,6 +9,7 @@ const Checkout = () => {
   const [error, setError] = useState('');
   const [amount, setAmount] = useState(100);
   const [isPaying, setIsPaying] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
   const orderId = `ORDER_${Date.now()}`;
   const navigate = useNavigate();
 
@@ -19,15 +20,14 @@ const Checkout = () => {
         if (!res.ok) throw new Error('Failed to fetch config');
         const data = await res.json();
         
-        // Validate the required config fields
-        if (!data.payeeVpa || !data.payeeName) {
+        if (!data?.payeeVpa || !data?.payeeName) {
           throw new Error('Merchant configuration incomplete');
         }
         
         setConfig({
           payeeVpa: data.payeeVpa,
           payeeName: data.payeeName,
-          mcc: data.mcc || '6012' // Default MCC if not provided
+          mcc: data.mcc || '6012'
         });
       } catch (err) {
         setError(err.message || 'Failed to load payment configuration');
@@ -39,7 +39,7 @@ const Checkout = () => {
     fetchConfig();
   }, []);
 
-  const handlePayment = async () => {
+  const handlePayment = async (app = null) => {
     if (!config) {
       setError('Payment system not configured');
       return;
@@ -54,7 +54,6 @@ const Checkout = () => {
     setError('');
 
     try {
-      // Initiate payment session with backend
       const sessionRes = await fetch(`${server}/payment/initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,19 +66,57 @@ const Checkout = () => {
       }
 
       const { sessionId } = await sessionRes.json();
-      
-      // Generate UPI link with the validated config
       const upiLinks = generateUpiLink(config, amount, orderId, sessionId);
 
-      // Try to open UPI app
-      const paymentWindow = window.open(upiLinks.upiIntent, '_blank');
+      // Special handling for IDFC accounts
+      const isIdfcAccount = config.payeeVpa.endsWith('@idfcbank');
       
-      // Fallback if UPI app doesn't open
-      setTimeout(() => {
-        if (!paymentWindow || paymentWindow.closed || paymentWindow.location.href === 'about:blank') {
-          window.location.href = upiLinks.fallbackUrl;
-        }
-      }, 1000);
+      // App-specific handling
+      if (app === 'phonepe' && isIdfcAccount) {
+        // PhonePe deep link with special parameters for IDFC
+        window.location.href = `phonepe://pay?${new URLSearchParams({
+          pa: config.payeeVpa,
+          pn: encodeURIComponent(config.payeeName),
+          am: amount.toFixed(2),
+          tn: `Payment for ${orderId}`.substring(0, 50),
+          tr: sessionId,
+          cu: 'INR',
+          mode: '02',
+          orgid: '000393'
+        }).toString()}`;
+      } 
+      else if (app === 'gpay') {
+        // Google Pay specific handling
+        window.open(`tez://upi/pay?${new URLSearchParams({
+          pa: config.payeeVpa,
+          pn: encodeURIComponent(config.payeeName),
+          am: amount.toFixed(2),
+          tn: `Payment for ${orderId}`.substring(0, 50),
+          tr: sessionId
+        }).toString()}`);
+      }
+      else {
+        // Default UPI handling with IDFC workaround
+        const upiParams = new URLSearchParams({
+          pa: config.payeeVpa,
+          pn: encodeURIComponent(config.payeeName),
+          am: amount.toFixed(2),
+          tn: `Payment for ${orderId}`.substring(0, 50),
+          mc: isIdfcAccount ? '6012' : config.mcc,
+          tr: sessionId,
+          cu: 'INR',
+          ...(isIdfcAccount ? { mode: '02', orgid: '000393' } : {})
+        });
+
+        const paymentWindow = window.open(`upi://pay?${upiParams.toString()}`, '_blank');
+        
+        // Fallback after 1 second
+        setTimeout(() => {
+          if (!paymentWindow || paymentWindow.closed || paymentWindow.location.href === 'about:blank') {
+            window.location.href = `https://upilink.in/pay?${upiParams.toString()}`;
+          }
+        }, 1000);
+      }
 
       navigate(`/status/${sessionId}`);
 
@@ -91,39 +128,106 @@ const Checkout = () => {
     }
   };
 
-  if (loading) return <div className="loading">Loading payment options...</div>;
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading payment options...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="checkout">
-      <h2>Make Payment</h2>
+    <div className="checkout-container">
+      <h2>Make a Payment</h2>
       
-      {error && <div className="error">{error}</div>}
+      {error && (
+        <div className="error-message">
+          <span>⚠️</span> {error}
+        </div>
+      )}
       
-      <div className="amount-field">
-        <label>Amount (₹):</label>
+      <div className="amount-section">
+        <label htmlFor="amount">Enter Amount (₹):</label>
         <input
+          id="amount"
           type="number"
           min="1"
           max="2000"
           value={amount}
           onChange={(e) => setAmount(Math.min(2000, Math.max(1, e.target.value)))}
+          placeholder="100"
         />
       </div>
 
       {config && (
-        <div className="merchant-info">
-          <p>Merchant: {config.payeeName}</p>
-          <p>UPI ID: {config.payeeVpa}</p>
+        <div className="merchant-details">
+          <h4>Merchant Information:</h4>
+          <p><strong>Name:</strong> {config.payeeName}</p>
+          <p><strong>UPI ID:</strong> {config.payeeVpa}</p>
         </div>
       )}
 
-      <button 
-        onClick={handlePayment} 
-        disabled={isPaying || !config}
-        className="pay-button"
-      >
-        {isPaying ? 'Processing...' : 'Pay Now'}
-      </button>
+      <div className="payment-options">
+        <h4>Select Payment Method:</h4>
+        
+        <div className="upi-apps">
+          <button 
+            className={`app-button ${selectedApp === 'phonepe' ? 'selected' : ''}`}
+            onClick={() => setSelectedApp('phonepe')}
+            disabled={isPaying}
+          >
+            {/* <img src={PhonePeLogo} alt="PhonePe" /> */}
+            PhonePe
+          </button>
+          
+          <button 
+            className={`app-button ${selectedApp === 'gpay' ? 'selected' : ''}`}
+            onClick={() => setSelectedApp('gpay')}
+            disabled={isPaying}
+          >
+            {/* <img src={GooglePayLogo} alt="Google Pay" /> */}
+            Google Pay
+          </button>
+          
+          <button 
+            className={`app-button ${selectedApp === 'paytm' ? 'selected' : ''}`}
+            onClick={() => setSelectedApp('paytm')}
+            disabled={isPaying}
+          >
+            {/* <img src={PaytmLogo} alt="Paytm" /> */}
+            Paytm
+          </button>
+          
+          <button 
+            className={`app-button ${selectedApp === 'bhim' ? 'selected' : ''}`}
+            onClick={() => setSelectedApp('bhim')}
+            disabled={isPaying}
+          >
+            {/* <img src={BHIMLogo} alt="BHIM" /> */}
+            BHIM
+          </button>
+        </div>
+
+        <button 
+          className="pay-now-button"
+          onClick={() => handlePayment(selectedApp)}
+          disabled={isPaying || !selectedApp}
+        >
+          {isPaying ? (
+            <>
+              <span className="spinner-small"></span> Processing...
+            </>
+          ) : (
+            'Pay Now'
+          )}
+        </button>
+      </div>
+
+      <div className="info-note">
+        <p>Note: For IDFC Bank accounts, PhonePe is recommended for best results.</p>
+        <p>Maximum payment amount: ₹2000</p>
+      </div>
     </div>
   );
 };
