@@ -26,31 +26,38 @@ const Checkout = () => {
     fetchConfig();
   }, []);
 
-  const handlePayment = async () => {
-    try {
-      // Initiate payment session
-      const sessionRes = await fetch(`${server}/payment/initiate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, orderId })
-      });
-      
-      const { sessionId } = await sessionRes.json();
-      const links = generateUpiLink(config, amount, orderId, sessionId);
-
-      // Try opening UPI apps
-      window.location.href = links.upi;
-      setTimeout(() => {
-        window.location.href = links.apps.phonepe;
-      }, 500);
-      setTimeout(() => {
-        window.location.href = links.apps.gpay;
-      }, 1000);
-
-    } catch (err) {
-      setError('Payment initiation failed');
+ const handlePayment = async () => {
+  try {
+    if (amount > 1999) {
+      setError('Maximum payment amount is ₹1999');
+      return;
     }
-  };
+
+    const sessionRes = await fetch(`${server}/payment/initiate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, orderId })
+    });
+    
+    const { sessionId } = await sessionRes.json();
+    const links = generateUpiLink(config, amount, orderId, sessionId);
+
+    // Open payment in new tab with fallback
+    const paymentWindow = window.open(links.upi, '_blank');
+    
+    // Fallback handling
+    setTimeout(() => {
+      if (paymentWindow.closed) return;
+      paymentWindow.location.href = `https://upilink.in/${links.upi}`;
+    }, 2000);
+
+    // Navigate to status page
+    window.location.href = `/status/${sessionId}`;
+
+  } catch (err) {
+    setError('Payment initiation failed. Please try again.');
+  }
+};
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="error">{error}</div>;
