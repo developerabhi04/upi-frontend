@@ -45,7 +45,7 @@ const Checkout = () => {
       const links = generateUpiLink(config, amount, orderId, sessionId);
 
       // Open payment in new tab with fallback
-      const paymentWindow = window.open(links.upi, '_blank');
+      const paymentWindow = window.open(links.upi);
 
       // Fallback handling
       setTimeout(() => {
