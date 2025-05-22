@@ -1,13 +1,16 @@
-// src/Utils/UpiUtils.js
 export function generateUpiDeeplink({ payeeVpa, payeeName, amount, note, mcc }) {
   const params = new URLSearchParams({
     pa: payeeVpa,
     pn: payeeName,
     am: amount.toFixed(2),
-    tn: note,
+    tn: note.substring(0, 50), // Limit note to 50 chars
     cu: 'INR',
     mc: mcc,
-    tr: `TXN${Date.now()}`
+    tr: `TXN${Date.now().toString().slice(-6)}`
   });
-  return `phonepe://pay?${params.toString()}&redirectUrl=${encodeURIComponent(window.location.href)}`;
+
+  return {
+    direct: `upi://pay?${params.toString()}`,
+    webFallback: `https://upilink.in/pay?${params.toString()}`
+  };
 }

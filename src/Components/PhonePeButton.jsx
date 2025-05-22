@@ -2,53 +2,51 @@ import React, { useEffect, useState } from 'react';
 import { generateUpiDeeplink } from '../Utils/UpiUtils.js';
 import { server } from '../server.js';
 
-const API_URL = `${server}/payment/config`;
+
+
 
 const PhonePeButton = ({ amount, orderId }) => {
   const [config, setConfig] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(API_URL)
-      .then(async res => {
+    const fetchConfig = async () => {
+      try {
+        const res = await fetch(`${server}/api/v1/payment/config`);
         const data = await res.json();
-        if (res.ok) {
-          setConfig(data);
-        } else {
-          setError(data.error || 'VPA not configured');
-        }
-      })
-      .catch(() => setError('Server unreachable'));
+        if (res.ok) setConfig(data);
+        else setError(data.error || 'Payment configuration error');
+      } catch (err) {
+        setError('Payment service unavailable');
+      }
+    };
+    fetchConfig();
   }, []);
 
   const handlePayment = () => {
-    if (!config) return;
-    const deeplink = generateUpiDeeplink({
-      vpa: config.payeeVpa,
-      name: config.payeeName,
+    if (!config || error) return;
+
+    const { direct, webFallback } = generateUpiDeeplink({
+      payeeVpa: config.payeeVpa,
+      payeeName: config.payeeName,
       amount,
-      note: `Order #${orderId}`
+      note: `Order ${orderId}`,
+      mcc: config.mcc
     });
 
-    // Try PhonePe first
-    window.location.href = deeplink.replace('upi://', 'phonepe://');
-
-    // Fallback after 800ms
+    window.location.href = direct;
     setTimeout(() => {
-      window.location.href = deeplink;
-    }, 800);
+      window.location.href = webFallback;
+    }, 1000);
   };
 
-  if (error) {
-    return <button disabled>{error}</button>;
-  }
-  if (!config) {
-    return <button disabled>Loading...</button>;
-  }
-
   return (
-    <button onClick={handlePayment}>
-      Pay ₹{amount} with PhonePe / UPI
+    <button 
+      onClick={handlePayment}
+      disabled={!config || error}
+      className="payment-button"
+    >
+      {error || `Pay ₹${amount} via UPI`}
     </button>
   );
 };

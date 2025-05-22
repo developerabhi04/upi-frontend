@@ -2,58 +2,72 @@
 import { useState } from 'react';
 import { server } from '../server.js';
 
+
 const AdminVpaConfig = () => {
   const [formData, setFormData] = useState({
-    payeeVpa: '',
+    payeeVpa: '9599516256@idfcbank',
     payeeName: '',
-    mcc: '',
-    isMerchantAccount: true
+    mcc: '6012',
+    isMerchantAccount: true,
+    gstin: ''
   });
-  const [msg, setMsg] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMsg('');
+    setMessage('Saving...');
+    
     try {
-      const res = await fetch(`${server}/payment/config`, {
+      const res = await fetch(`${server}/api/v1/payment/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
+      
       const data = await res.json();
-      if (res.ok) setMsg('Saved!');
-      else setMsg(data.error || 'Error saving VPA');
+      setMessage(res.ok ? 'Configuration saved!' : data.error || 'Save failed');
     } catch (err) {
-      setMsg('Network error');
+      setMessage('Network error');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{maxWidth: 400, margin: "2rem auto"}}>
-      <input
-        placeholder="Merchant VPA (e.g., business@ybl)"
-        value={formData.payeeVpa}
-        onChange={e => setFormData({...formData, payeeVpa: e.target.value})}
-        pattern="^[A-Za-z0-9_.-]+@[A-Za-z0-9]+$"
-        required
-      />
-      <input
-        placeholder="Merchant Name"
-        value={formData.payeeName}
-        onChange={e => setFormData({...formData, payeeName: e.target.value})}
-        required
-      />
-      <input
-        placeholder="MCC Code (4 digits)"
-        value={formData.mcc}
-        onChange={e => setFormData({...formData, mcc: e.target.value})}
-        pattern="\d{4}"
-        required
-      />
-      <button type="submit">Save Merchant Config</button>
-      {msg && <div style={{marginTop: 10}}>{msg}</div>}
+    <form onSubmit={handleSubmit} className="config-form">
+      <div className="form-group">
+        <label>Merchant VPA:</label>
+        <input
+          value={formData.payeeVpa}
+          onChange={(e) => setFormData({...formData, payeeVpa: e.target.value})}
+          pattern="^[0-9]{10}@[a-zA-Z0-9]+$"
+          required
+        />
+      </div>
+      
+      <div className="form-group">
+        <label>Merchant Name:</label>
+        <input
+          value={formData.payeeName}
+          onChange={(e) => setFormData({...formData, payeeName: e.target.value})}
+          maxLength="50"
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label>MCC Code:</label>
+        <input
+          value={formData.mcc}
+          onChange={(e) => setFormData({...formData, mcc: e.target.value})}
+          pattern="\d{4}"
+          required
+        />
+      </div>
+
+      <button type="submit">Save Configuration</button>
+      {message && <div className="message">{message}</div>}
     </form>
   );
 };
 
 export default AdminVpaConfig;
+
