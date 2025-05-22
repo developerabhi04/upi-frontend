@@ -1,15 +1,23 @@
 export const generateUpiLink = (config, amount, orderId, sessionId) => {
+  // Validate inputs
+  if (!config || !config.payeeVpa || !config.payeeName) {
+    throw new Error('Invalid merchant configuration');
+  }
+
   const params = new URLSearchParams({
     pa: config.payeeVpa,
-    pn: config.payeeName,
+    pn: encodeURIComponent(config.payeeName),
     am: amount.toFixed(2),
-    tn: `Payment for Order ${orderId}`.substring(0, 50), // Max 50 chars
-    mc: config.mcc,
-    tr: `TXN${Date.now()}${Math.random().toString(36).substr(2, 4)}`, // Unique TXN ID
+    tn: `Payment for ${orderId}`.substring(0, 50),
+    mc: config.mcc || '6012',
+    tr: sessionId,
     cu: 'INR',
-    url: window.location.href // Redirect back URL
+    url: `${window.location.origin}/status/${sessionId}`
   });
 
-  // Universal UPI intent
-  return `upi://pay?${params.toString()}&mode=00&orgid=000000`; // Add merchant mode
+  // Return both UPI intent and fallback URL
+  return {
+    upiIntent: `upi://pay?${params.toString()}`,
+    fallbackUrl: `https://upilink.in/pay?${params.toString()}`
+  };
 };
