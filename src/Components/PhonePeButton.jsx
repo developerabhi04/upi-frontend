@@ -12,7 +12,7 @@ const PhonePeButton = ({ amount, orderId }) => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch(`${server}/api/v1/payment/config`);
+        const res = await fetch(`${server}/payment/config`);
         const data = await res.json();
         if (res.ok) setConfig(data);
         else setError(data.error || 'Payment configuration error');

@@ -6,7 +6,7 @@ import { server } from '../server.js';
 const AdminVpaConfig = () => {
   const [formData, setFormData] = useState({
     payeeVpa: '9599516256@idfcbank',
-    payeeName: '',
+    payeeName: 'Ananta Technology',
     mcc: '6012',
     isMerchantAccount: true,
     gstin: ''
@@ -18,7 +18,7 @@ const AdminVpaConfig = () => {
     setMessage('Saving...');
     
     try {
-      const res = await fetch(`${server}/api/v1/payment/config`, {
+      const res = await fetch(`${server}/payment/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
