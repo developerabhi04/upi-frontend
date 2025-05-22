@@ -31,7 +31,7 @@ const PhonePeButton = ({ amount, orderId }) => {
     });
 
     // Try PhonePe first
-    window.location.href = deeplink.replace('upi://pay?pn=Payee Name&pa=payeevpa@upi&am=20', 'phonepe://');
+    window.location.href = deeplink.replace('upi://', 'phonepe://');
 
     // Fallback after 800ms
     setTimeout(() => {
