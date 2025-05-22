@@ -15,9 +15,6 @@ const Checkout = () => {
       try {
         const res = await fetch(`${server}/payment/config`, {
           credentials: 'include', // Add for cookies
-          headers: {
-            'Content-Security-Policy': 'connect-src https://upi-backend-4.onrender.com'
-          }
         });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
