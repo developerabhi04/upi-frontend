@@ -7,7 +7,7 @@ const Checkout = () => {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const amount = 100; // Example amount
+  const amount = 1999; // Example amount
   const orderId = `ORDER_${Date.now()}`;
 
   useEffect(() => {
