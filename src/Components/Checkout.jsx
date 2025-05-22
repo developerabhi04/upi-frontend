@@ -7,7 +7,7 @@ const Checkout = () => {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [amount, setAmount] = useState(100); // Default amount
+  const [amount, setAmount] = useState(100);
   const [isPaying, setIsPaying] = useState(false);
   const orderId = `ORDER_${Date.now()}`;
   const navigate = useNavigate();
@@ -16,11 +16,21 @@ const Checkout = () => {
     const fetchConfig = async () => {
       try {
         const res = await fetch(`${server}/payment/config`);
+        if (!res.ok) throw new Error('Failed to fetch config');
         const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        setConfig(data);
+        
+        // Validate the required config fields
+        if (!data.payeeVpa || !data.payeeName) {
+          throw new Error('Merchant configuration incomplete');
+        }
+        
+        setConfig({
+          payeeVpa: data.payeeVpa,
+          payeeName: data.payeeName,
+          mcc: data.mcc || '6012' // Default MCC if not provided
+        });
       } catch (err) {
-        setError('Failed to load payment configuration. Please try again later.');
+        setError(err.message || 'Failed to load payment configuration');
         console.error('Config load error:', err);
       } finally {
         setLoading(false);
@@ -44,7 +54,7 @@ const Checkout = () => {
     setError('');
 
     try {
-      // Initiate payment session
+      // Initiate payment session with backend
       const sessionRes = await fetch(`${server}/payment/initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,52 +62,46 @@ const Checkout = () => {
       });
 
       if (!sessionRes.ok) {
-        throw new Error('Failed to initiate payment');
+        const errorData = await sessionRes.json();
+        throw new Error(errorData.error || 'Payment initiation failed');
       }
 
-      const { sessionId, payeeVpa, payeeName } = await sessionRes.json();
+      const { sessionId } = await sessionRes.json();
       
-      // Generate UPI link with proper merchant details
-      const upiLinks = generateUpiLink(
-        { payeeVpa, payeeName, mcc: config.mcc },
-        amount,
-        orderId,
-        sessionId
-      );
+      // Generate UPI link with the validated config
+      const upiLinks = generateUpiLink(config, amount, orderId, sessionId);
 
-      // Try to open UPI app directly
+      // Try to open UPI app
       const paymentWindow = window.open(upiLinks.upiIntent, '_blank');
       
-      // Fallback mechanism
+      // Fallback if UPI app doesn't open
       setTimeout(() => {
         if (!paymentWindow || paymentWindow.closed || paymentWindow.location.href === 'about:blank') {
           window.location.href = upiLinks.fallbackUrl;
         }
       }, 1000);
 
-      // Navigate to status page
       navigate(`/status/${sessionId}`);
 
     } catch (err) {
       console.error('Payment error:', err);
-      setError(err.message || 'Payment initiation failed. Please try again.');
+      setError(err.message);
     } finally {
       setIsPaying(false);
     }
   };
 
-  if (loading) return <div className="loading-spinner">Loading payment options...</div>;
+  if (loading) return <div className="loading">Loading payment options...</div>;
 
   return (
-    <div className="checkout-container">
-      <h2>Make a Payment</h2>
+    <div className="checkout">
+      <h2>Make Payment</h2>
       
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="error">{error}</div>}
       
-      <div className="amount-selector">
-        <label htmlFor="amount">Amount (₹):</label>
+      <div className="amount-field">
+        <label>Amount (₹):</label>
         <input
-          id="amount"
           type="number"
           min="1"
           max="2000"
@@ -106,32 +110,20 @@ const Checkout = () => {
         />
       </div>
 
-      <div className="merchant-info">
-        {config && (
-          <>
-            <p>Merchant: {config.payeeName}</p>
-            <p>VPA: {config.payeeVpa}</p>
-          </>
-        )}
-      </div>
+      {config && (
+        <div className="merchant-info">
+          <p>Merchant: {config.payeeName}</p>
+          <p>UPI ID: {config.payeeVpa}</p>
+        </div>
+      )}
 
       <button 
         onClick={handlePayment} 
         disabled={isPaying || !config}
         className="pay-button"
       >
-        {isPaying ? 'Processing...' : 'Pay via UPI'}
+        {isPaying ? 'Processing...' : 'Pay Now'}
       </button>
-
-      {/* <div className="upi-apps">
-        <p>Supported UPI Apps:</p>
-        <div className="app-icons">
-          <img src="/icons/gpay.png" alt="Google Pay" />
-          <img src="/icons/phonepe.png" alt="PhonePe" />
-          <img src="/icons/paytm.png" alt="Paytm" />
-          <img src="/icons/bhim.png" alt="BHIM" />
-        </div>
-      </div> */}
     </div>
   );
 };
