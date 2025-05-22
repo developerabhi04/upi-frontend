@@ -5,15 +5,14 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <meta http-equiv="Content-Security-Policy" 
-      content="default-src 'self' http://localhost:4000 ws://localhost:4000;
-               connect-src 'self' http://localhost:4000 https://*.phonepe.com https://*.upilink.in;
-               script-src 'self' 'unsafe-inline';
-               style-src 'self' 'unsafe-inline';
-               img-src 'self' data:;
-               frame-src 'self' upi://* phonepe://* paytmmp://*;
-               ">
-  <title>Vite + React</title>
+  <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self';
+                 connect-src 'self' https://upi-backend-4.onrender.com;
+                 script-src 'self' 'unsafe-inline';
+                 style-src 'self' 'unsafe-inline';
+                 img-src 'self' data:;
+                 frame-src upi://* phonepe://* paytmmp://*;">
+  <title>UPI Payment Gateway</title>
 </head>
 
 <body>

@@ -13,7 +13,12 @@ const Checkout = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch(`${server}/payment/config`);
+        const res = await fetch(`${server}/payment/config`, {
+          credentials: 'include', // Add for cookies
+          headers: {
+            'Content-Security-Policy': 'connect-src https://upi-backend-4.onrender.com'
+          }
+        });
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         setConfig(data);
@@ -26,38 +31,38 @@ const Checkout = () => {
     fetchConfig();
   }, []);
 
- const handlePayment = async () => {
-  try {
-    if (amount > 1999) {
-      setError('Maximum payment amount is ₹1999');
-      return;
+  const handlePayment = async () => {
+    try {
+      if (amount > 1999) {
+        setError('Maximum payment amount is ₹1999');
+        return;
+      }
+
+      const sessionRes = await fetch(`${server}/payment/initiate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, orderId })
+      });
+
+      const { sessionId } = await sessionRes.json();
+      const links = generateUpiLink(config, amount, orderId, sessionId);
+
+      // Open payment in new tab with fallback
+      const paymentWindow = window.open(links.upi, '_blank');
+
+      // Fallback handling
+      setTimeout(() => {
+        if (paymentWindow.closed) return;
+        paymentWindow.location.href = `https://upilink.in/${links.upi}`;
+      }, 2000);
+
+      // Navigate to status page
+      window.location.href = `/status/${sessionId}`;
+
+    } catch (err) {
+      setError('Payment initiation failed. Please try again.');
     }
-
-    const sessionRes = await fetch(`${server}/payment/initiate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, orderId })
-    });
-    
-    const { sessionId } = await sessionRes.json();
-    const links = generateUpiLink(config, amount, orderId, sessionId);
-
-    // Open payment in new tab with fallback
-    const paymentWindow = window.open(links.upi, '_blank');
-    
-    // Fallback handling
-    setTimeout(() => {
-      if (paymentWindow.closed) return;
-      paymentWindow.location.href = `https://upilink.in/${links.upi}`;
-    }, 2000);
-
-    // Navigate to status page
-    window.location.href = `/status/${sessionId}`;
-
-  } catch (err) {
-    setError('Payment initiation failed. Please try again.');
-  }
-};
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="error">{error}</div>;
