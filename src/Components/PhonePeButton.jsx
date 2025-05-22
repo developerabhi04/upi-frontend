@@ -23,22 +23,45 @@ const PhonePeButton = ({ amount, orderId }) => {
     fetchConfig();
   }, []);
 
-  const handlePayment = () => {
-    if (!config || error) return;
+  const handlePayment = async () => {
+  if (!config) return;
 
-    const { direct, webFallback } = generateUpiDeeplink({
+  try {
+    // Start payment session
+    const sessionRes = await fetch(`${server}/payment/initiate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, orderId })
+    });
+    
+    const { sessionId } = await sessionRes.json();
+    
+    const deeplink = generateUpiDeeplink({
       payeeVpa: config.payeeVpa,
       payeeName: config.payeeName,
       amount,
-      note: `Order ${orderId}`,
+      note: `Order:${orderId}|Session:${sessionId}`,
       mcc: config.mcc
     });
 
-    window.location.href = direct;
-    setTimeout(() => {
-      window.location.href = webFallback;
-    }, 1000);
-  };
+    // Open UPI intent
+    window.location.href = deeplink;
+    
+    // Payment verification polling
+    const pollStatus = setInterval(async () => {
+      const res = await fetch(`${server}/payment/status/${sessionId}`);
+      const { status } = await res.json();
+      
+      if (status === 'success') {
+        clearInterval(pollStatus);
+        // Handle success
+      }
+    }, 3000);
+
+  } catch (error) {
+    setError('Payment initiation failed');
+  }
+};
 
   return (
     <button 

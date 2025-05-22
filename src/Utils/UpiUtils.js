@@ -1,16 +1,20 @@
-export function generateUpiDeeplink({ payeeVpa, payeeName, amount, note, mcc }) {
+export const generateUpiLink = (config, amount, orderId, sessionId) => {
   const params = new URLSearchParams({
-    pa: payeeVpa,
-    pn: payeeName,
+    pa: config.payeeVpa,
+    pn: config.payeeName,
     am: amount.toFixed(2),
-    tn: note.substring(0, 50), // Limit note to 50 chars
-    cu: 'INR',
-    mc: mcc,
-    tr: `TXN${Date.now().toString().slice(-6)}`
+    tn: `Order:${orderId}`,
+    mc: config.mcc,
+    tr: `TXN${Date.now()}`,
+    cu: 'INR'
   });
 
   return {
-    direct: `upi://pay?${params.toString()}`,
-    webFallback: `https://upilink.in/pay?${params.toString()}`
+    upi: `upi://pay?${params}`,
+    apps: {
+      phonepe: `phonepe://pay?${params}`,
+      gpay: `tez://upi/pay?${params}`,
+      paytm: `paytmmp://pay?${params}`
+    }
   };
-}
+};
