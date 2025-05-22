@@ -7,7 +7,7 @@ const Checkout = () => {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [amount, setAmount] = useState(100);
+  const [amount, setAmount] = useState(2000);
   const [isPaying, setIsPaying] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
   const orderId = `ORDER_${Date.now()}`;
@@ -151,12 +151,9 @@ const Checkout = () => {
         <label htmlFor="amount">Enter Amount (₹):</label>
         <input
           id="amount"
-          type="number"
-          min="1"
-          max="2000"
           value={amount}
           onChange={(e) => setAmount(Math.min(2000, Math.max(1, e.target.value)))}
-          placeholder="100"
+          placeholder="2000"
         />
       </div>
 
