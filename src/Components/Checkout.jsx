@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generateUpiLink } from '../Utils/UpiUtils.js';
 import { server } from '../server.js';
-import "./Checkout.css"
+import phonepeIcon from '../assets/images.png';
+import payTmIcon from '../assets/unnamed.png';
+import googlePayIcon from '../assets/8dece15cc40aaf66ed47f6591b639d06.jpg';
+import bhimIcon from '../assets/images (1).png';
+import "./Checkout.css";
 
 const Checkout = () => {
   const [state, setState] = useState({
@@ -16,12 +20,20 @@ const Checkout = () => {
   });
   const navigate = useNavigate();
 
+  // Map app keys to their imported icons
+  const appIcons = {
+    phonepe: phonepeIcon,
+    paytm: payTmIcon,
+    gpay: googlePayIcon,
+    bhim: bhimIcon
+  };
+
   useEffect(() => {
     const loadMerchantConfig = async () => {
       try {
         const response = await fetch(`${server}/payment/config`);
         const configData = await response.json();
-        
+
         if (!response.ok) throw new Error(configData.error || 'Invalid merchant configuration');
         if (!configData.payeeVpa) throw new Error('Merchant UPI ID not configured');
 
@@ -50,7 +62,7 @@ const Checkout = () => {
   const initiatePaymentSession = async () => {
     try {
       const orderId = `ORD_${Date.now()}_${crypto.randomUUID().slice(0, 6)}`;
-      
+
       const response = await fetch(`${server}/payment/initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,37 +84,28 @@ const Checkout = () => {
   };
 
   const handleAppPayment = async (app) => {
+    if (!app) return;
     try {
       setState(prev => ({ ...prev, isProcessing: true, error: '' }));
 
-      // Step 1: Create payment session with backend
+      // Create payment session, generate links
       const sessionData = await initiatePaymentSession();
-      
-      // Step 2: Generate platform-specific UPI links
       const upiLinks = generateUpiLink(sessionData.config, sessionData);
       
-      // Step 3: Handle app-specific deep links
-      const openPaymentApp = () => {
-        const appUrls = {
-          phonepe: `phonepe://pay?${upiLinks.params}`,
-          gpay: `tez://upi/pay?${upiLinks.params}`,
-          paytm: `paytmmp://pay?${upiLinks.params}`,
-          bhim: `upi://pay?${upiLinks.params}`
-        };
-
-        const popup = window.open(appUrls[app], '_blank');
-        
-        // Fallback handling
-        setTimeout(() => {
-          if (!popup || popup.closed) {
-            window.location.href = upiLinks.webFallback;
-          }
-        }, 2500);
+      // Deep link URL mapping
+      const appUrls = {
+        phonepe: `phonepe://pay?${upiLinks.params}`,
+        gpay: `tez://upi/pay?${upiLinks.params}`,
+        paytm: `paytmmp://pay?${upiLinks.params}`,
+        bhim: `upi://pay?${upiLinks.params}`
       };
 
-      // Step 4: Navigate to status page
+      // Navigate to status and open app
       navigate(`/status/${sessionData.sessionId}`);
-      openPaymentApp();
+      const popup = window.open(appUrls[app], '_blank');
+      setTimeout(() => {
+        if (!popup || popup.closed) window.location.href = upiLinks.webFallback;
+      }, 2500);
 
     } catch (error) {
       setState(prev => ({
@@ -136,7 +139,7 @@ const Checkout = () => {
   return (
     <div className="checkout-container">
       <h1>Secure UPI Payment</h1>
-      
+
       <div className="amount-section">
         <label htmlFor="amountInput">Amount (₹)</label>
         <input
@@ -159,18 +162,17 @@ const Checkout = () => {
 
       <div className="payment-methods">
         <h3>Select Payment App</h3>
-        
         <div className="app-buttons">
-          {['phonepe', 'gpay', 'paytm', 'bhim'].map((app) => (
+          {['phonepe', 'gpay', 'paytm', 'bhim'].map(app => (
             <button
               key={app}
               className={`app-button ${state.selectedApp === app ? 'selected' : ''}`}
               onClick={() => setState(prev => ({ ...prev, selectedApp: app }))}
               disabled={state.isProcessing}
             >
-              <img 
-                src={`/${app}-logo.png`} 
-                alt={`${app} logo`} 
+              <img
+                src={appIcons[app]}
+                alt={`${app} logo`}
                 className="app-logo"
               />
               {app.charAt(0).toUpperCase() + app.slice(1)}
@@ -205,6 +207,5 @@ const Checkout = () => {
     </div>
   );
 };
-
 
 export default Checkout;
