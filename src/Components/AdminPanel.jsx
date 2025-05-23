@@ -140,15 +140,7 @@ const AdminPanel = () => {
         </button>
       </form>
 
-      <div className="instructions">
-        <h3>Configuration Instructions:</h3>
-        <ol>
-          <li>Ensure your IDFC Bank account is enabled for UPI merchant payments</li>
-          <li>Contact IDFC Bank to activate your account as a merchant account</li>
-          <li>Select the appropriate MCC code for your business type</li>
-          <li>Test with small amounts (₹1-₹10) before processing real payments</li>
-        </ol>
-      </div>
+      
     </div>
   );
 };

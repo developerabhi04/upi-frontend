@@ -221,10 +221,7 @@ const Checkout = () => {
         </button>
       </div>
 
-      <div className="info-note">
-        <p>Note: For IDFC Bank accounts, PhonePe is recommended for best results.</p>
-        <p>Maximum payment amount: ₹2000</p>
-      </div>
+    
     </div>
   );
 };
