@@ -1,25 +1,26 @@
-// Updated UpiUtils.js with IDFC workaround
-export const generateUpiLink = (config, amount, orderId, sessionId) => {
-  // Workaround for IDFC accounts
-  const isIdfcAccount = config.payeeVpa.endsWith('@idfcbank');
-  
+export const generateUpiLink = (config, sessionData) => {
   const params = new URLSearchParams({
     pa: config.payeeVpa,
-    pn: encodeURIComponent(config.payeeName),
-    am: amount.toFixed(2),
-    tn: `Payment for ${orderId}`.substring(0, 50),
-    mc: isIdfcAccount ? '6012' : config.mcc, // Force MCC for IDFC
-    tr: sessionId,
+    pn: encodeURIComponent(config.payeeName.substring(0, 50)),
+    am: sessionData.amount.toFixed(2), // Use exact backend amount
+    tn: `Payment-${sessionData.orderId}`, // Enhanced transaction note
+    tr: sessionData.sessionId,
     cu: 'INR',
-    mode: isIdfcAccount ? '02' : '00', // Special mode for problematic accounts
-    orgid: isIdfcAccount ? '000393' : '000000' // IDFC bank org code
+    mc: config.mcc, // Use configured MCC
+    ...(config.isIDFC && {
+      mode: '02',
+      orgid: '000393',
+      ver: '01' // Add version parameter
+    })
   });
 
   return {
-    upiIntent: `upi://pay?${params.toString()}`,
-    // Special PhonePe deep link for IDFC
-    phonePeLink: isIdfcAccount ? 
-      `phonepe://pay?${params.toString()}` : 
-      null
+    universal: `upi://pay?${params}`,
+    webFallback: `https://upilink.in/pay?${params}`,
+    apps: {
+      phonepe: `phonepe://pay?${params}&sign=1`, // Add signature placeholder
+      gpay: `tez://upi/pay?${params}`,
+      paytm: `paytmmp://pay?${params}`
+    }
   };
 };
