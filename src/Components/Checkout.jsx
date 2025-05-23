@@ -61,10 +61,10 @@ const Checkout = () => {
   const initiatePaymentSession = async () => {
     try {
       const orderId = `ORD_${Date.now()}_${window.crypto.randomUUID().slice(0, 6)}`;
-      
+
       const response = await fetch(`${server}/payment/initiate`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}` // Add if using auth
         },
@@ -87,54 +87,67 @@ const Checkout = () => {
 
 
   const handleAppPayment = async (app) => {
-    try {
-      setState(prev => ({ ...prev, isProcessing: true, error: '' }));
+  try {
+    setState(prev => ({ ...prev, isProcessing: true, error: '' }));
 
-      // Step 1: Create payment session with backend
-      const sessionData = await initiatePaymentSession();
+    // Step 1: Create payment session with backend
+    const sessionData = await initiatePaymentSession();
+    
+    // Step 2: Generate more natural UPI links
+    const upiParams = new URLSearchParams({
+      pa: sessionData.payeeVpa,
+      pn: encodeURIComponent(sessionData.payeeName.substring(0, 30)),
+      am: sessionData.amount.toFixed(2),
+      tn: `${sessionData.txnNote}-${sessionData.orderId}`.substring(0, 50),
+      tr: sessionData.sessionId,
+      cu: 'INR',
+      mc: state.config.mcc,
+      mode: '02',
+      orgid: '000393',
+      ver: '01',
+      sign: '', // Empty signature field (will be filled by app)
+      cuid: sessionData.customerRef // Customer reference
+    });
+
+    // Step 3: Handle app-specific deep links with fallbacks
+    const appUrls = {
+      phonepe: `phonepe://pay?${upiParams}`,
+      gpay: `tez://upi/pay?${upiParams}`,
+      paytm: `paytmmp://pay?${upiParams}`,
+      bhim: `upi://pay?${upiParams}`
+    };
+
+    // More reliable app opening with timeout
+    const openApp = () => {
+      const popup = window.open(appUrls[app], '_blank', 'noopener,noreferrer');
       
-      // Step 2: Generate platform-specific UPI links
-      const upiParams = new URLSearchParams({
-        pa: sessionData.payeeVpa,
-        pn: encodeURIComponent(sessionData.payeeName),
-        am: sessionData.amount.toFixed(2),
-        tn: `Payment-${sessionData.orderId}`.substring(0, 50),
-        tr: sessionData.sessionId,
-        cu: 'INR',
-        mc: '6012', // Force MCC for IDFC
-        mode: '02',
-        orgid: '000393'
-      });
-
-      // Step 3: Handle app-specific deep links
-      const appUrls = {
-        phonepe: `phonepe://pay?${upiParams}`,
-        gpay: `tez://upi/pay?${upiParams}`,
-        paytm: `paytmmp://pay?${upiParams}`,
-        bhim: `upi://pay?${upiParams}`
-      };
-
-      // Step 4: Open payment app
-      const popup = window.open(appUrls[app], '_blank');
-      
-      // Fallback handling
       setTimeout(() => {
         if (!popup || popup.closed) {
-          window.location.href = `https://upilink.in/pay?${upiParams}`;
+          // Try direct UPI link
+          window.location.href = `upi://pay?${upiParams}`;
+          
+          // Final fallback to web
+          setTimeout(() => {
+            window.location.href = `https://upilink.in/pay?${upiParams}`;
+          }, 2000);
         }
-      }, 2500);
+      }, 1000);
+    };
 
-      // Step 5: Navigate to status page
-      navigate(`/status/${sessionData.sessionId}`);
+    // Add small delay to appear more natural
+    setTimeout(openApp, 500 + Math.random() * 1000);
 
-    } catch (error) {
-      setState(prev => ({
-        ...prev,
-        error: error.message.replace('Payment initialization error: ', ''),
-        isProcessing: false
-      }));
-    }
-  };
+    // Navigate to status page
+    navigate(`/status/${sessionData.sessionId}`);
+
+  } catch (error) {
+    setState(prev => ({
+      ...prev,
+      error: error.message.replace('Payment initialization error: ', ''),
+      isProcessing: false
+    }));
+  }
+};
 
 
   if (state.loading) {
@@ -190,13 +203,13 @@ const Checkout = () => {
               className={`app-button ${state.selectedApp === app ? 'selected' : ''}`}
               onClick={() => setState(prev => ({ ...prev, selectedApp: app }))}
               disabled={state.isProcessing}
-              
+
             >
               <img
                 src={appIcons[app]}
                 alt={`${app} logo`}
                 className="app-logo"
-                
+
               />
               {app.charAt(0).toUpperCase() + app.slice(1)}
             </button>
