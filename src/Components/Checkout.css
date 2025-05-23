@@ -14,6 +14,10 @@
   margin: 2rem 0;
 }
 
+.app-logo {
+    width: 29px;
+}
+
 .app-button {
   padding: 1rem;
   border: 2px solid #ddd;

@@ -169,11 +169,13 @@ const Checkout = () => {
               className={`app-button ${state.selectedApp === app ? 'selected' : ''}`}
               onClick={() => setState(prev => ({ ...prev, selectedApp: app }))}
               disabled={state.isProcessing}
+              
             >
               <img
                 src={appIcons[app]}
                 alt={`${app} logo`}
                 className="app-logo"
+                
               />
               {app.charAt(0).toUpperCase() + app.slice(1)}
             </button>
