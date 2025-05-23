@@ -1,245 +1,130 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { generateUpiLink } from '../Utils/UpiUtils.js';
 import { server } from '../server.js';
-import phonepeIcon from '../assets/images.png';
-import payTmIcon from '../assets/unnamed.png';
-import googlePayIcon from '../assets/8dece15cc40aaf66ed47f6591b639d06.jpg';
-import bhimIcon from '../assets/images (1).png';
-import "./Checkout.css";
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
-  const [state, setState] = useState({
-    config: null,
-    amount: 2000,
-    selectedApp: null,
-    loading: true,
-    error: '',
-    isProcessing: false,
-    sessionData: null
-  });
+  const [config, setConfig] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [amount, setAmount] = useState(2000);
+  const [isPaying, setIsPaying] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
   const navigate = useNavigate();
 
-  // Map app keys to their imported icons
-  const appIcons = {
-    phonepe: phonepeIcon,
-    paytm: payTmIcon,
-    gpay: googlePayIcon,
-    bhim: bhimIcon
-  };
-
   useEffect(() => {
-    const loadMerchantConfig = async () => {
+    (async () => {
       try {
-        const response = await fetch(`${server}/payment/config`);
-        const configData = await response.json();
-
-        if (!response.ok) throw new Error(configData.error || 'Invalid merchant configuration');
-        if (!configData.payeeVpa) throw new Error('Merchant UPI ID not configured');
-
-        setState(prev => ({
-          ...prev,
-          config: configData,
-          loading: false
-        }));
-      } catch (error) {
-        setState(prev => ({
-          ...prev,
-          error: error.message,
-          loading: false
-        }));
+        const res = await fetch(`${server}/payment/config`);
+        const data = await res.json();
+        if (!data?.payeeVpa) throw new Error('Merchant not configured');
+        setConfig(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    loadMerchantConfig();
+    })();
   }, []);
 
-  const handleAmountChange = (value) => {
-    const clampedValue = Math.min(2000, Math.max(1, Number(value)));
-    setState(prev => ({ ...prev, amount: clampedValue }));
-  };
+  const handlePayment = async (app = null) => {
+    if (!config) {
+      setError('Payment system not configured');
+      return;
+    }
+    if (amount > 2000 || amount <= 0) {
+      setError('Amount must be between ₹1 and ₹2000');
+      return;
+    }
 
-  const initiatePaymentSession = async () => {
+    setIsPaying(true);
+    setError('');
     try {
-      const orderId = `ORD_${Date.now()}_${window.crypto.randomUUID().slice(0, 6)}`;
-
-      const response = await fetch(`${server}/payment/initiate`, {
+      const sessionRes = await fetch(`${server}/payment/initiate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Add if using auth
-        },
-        body: JSON.stringify({
-          amount: Number(state.amount), // Ensure numeric value
-          orderId
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, orderId: `ORDER_${Date.now()}` })
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Payment initiation failed');
+      if (!sessionRes.ok) {
+        const errData = await sessionRes.json();
+        throw new Error(errData.error || 'Payment initiation failed');
       }
 
-      return await response.json();
-    } catch (error) {
-      throw new Error(`Payment initialization error: ${error.message}`);
+      // Destructure safeOrderId and sessionId
+      const { sessionId, orderId: safeOrderId } = await sessionRes.json();
+
+      const { appLinks, upiIntent, webFallback } = generateUpiLink(
+        config,
+        amount,
+        safeOrderId,
+        sessionId
+      );
+
+      // Delay slightly so UPI app registers each tap as distinct
+      const delay = 1000 + Math.random() * 2000;
+      setTimeout(() => {
+        if (app === 'phonepe') {
+          window.location.href = appLinks.phonepe;
+        } else if (app === 'gpay') {
+          window.open(appLinks.gpay, '_blank');
+        } else if (app === 'paytm') {
+          window.location.href = appLinks.paytm;
+        } else {
+          // default UPI intent
+          const win = window.open(upiIntent, '_blank');
+          setTimeout(() => {
+            if (!win || win.closed || win.location === 'about:blank') {
+              window.location.href = webFallback;
+            }
+          }, 800);
+        }
+      }, delay);
+
+      navigate(`/status/${sessionId}`, { replace: true });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsPaying(false);
     }
   };
 
-
-  const handleAppPayment = async (app) => {
-  try {
-    setState(prev => ({ ...prev, isProcessing: true, error: '' }));
-
-    // Step 1: Create payment session with backend
-    const sessionData = await initiatePaymentSession();
-    
-    // Step 2: Generate more natural UPI links
-    const upiParams = new URLSearchParams({
-      pa: sessionData.payeeVpa,
-      pn: encodeURIComponent(sessionData.payeeName.substring(0, 30)),
-      am: sessionData.amount.toFixed(2),
-      tn: `${sessionData.txnNote}-${sessionData.orderId}`.substring(0, 50),
-      tr: sessionData.sessionId,
-      cu: 'INR',
-      mc: state.config.mcc,
-      mode: '02',
-      orgid: '000393',
-      ver: '01',
-      sign: '', // Empty signature field (will be filled by app)
-      cuid: sessionData.customerRef // Customer reference
-    });
-
-    // Step 3: Handle app-specific deep links with fallbacks
-    const appUrls = {
-      phonepe: `phonepe://pay?${upiParams}`,
-      gpay: `tez://upi/pay?${upiParams}`,
-      paytm: `paytmmp://pay?${upiParams}`,
-      bhim: `upi://pay?${upiParams}`
-    };
-
-    // More reliable app opening with timeout
-    const openApp = () => {
-      const popup = window.open(appUrls[app], '_blank', 'noopener,noreferrer');
-      
-      setTimeout(() => {
-        if (!popup || popup.closed) {
-          // Try direct UPI link
-          window.location.href = `upi://pay?${upiParams}`;
-          
-          // Final fallback to web
-          setTimeout(() => {
-            window.location.href = `https://upilink.in/pay?${upiParams}`;
-          }, 2000);
-        }
-      }, 1000);
-    };
-
-    // Add small delay to appear more natural
-    setTimeout(openApp, 500 + Math.random() * 1000);
-
-    // Navigate to status page
-    navigate(`/status/${sessionData.sessionId}`);
-
-  } catch (error) {
-    setState(prev => ({
-      ...prev,
-      error: error.message.replace('Payment initialization error: ', ''),
-      isProcessing: false
-    }));
-  }
-};
-
-
-  if (state.loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading merchant configuration...</p>
-      </div>
-    );
-  }
-
-  if (state.error) {
-    return (
-      <div className="error-container">
-        <div className="error-icon">⚠️</div>
-        <h3>Configuration Error</h3>
-        <p>{state.error}</p>
-        <button onClick={() => window.location.reload()}>Refresh Page</button>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading payment options...</div>;
+  if (error)  return <div className="error">{error}</div>;
 
   return (
     <div className="checkout-container">
-      <h1>Secure UPI Payment</h1>
-
-      <div className="amount-section">
-        <label htmlFor="amountInput">Amount (₹)</label>
+      <h2>Make a Payment</h2>
+      <div>
+        <label>Amount (₹):</label>
         <input
-          id="amountInput"
           type="number"
           min="1"
           max="2000"
-          value={state.amount}
-          onChange={(e) => handleAmountChange(e.target.value)}
-          disabled={state.isProcessing}
+          value={amount}
+          onChange={e => setAmount(Number(e.target.value))}
         />
       </div>
-
-      <div className="merchant-info">
-        <h3>Merchant Details</h3>
-        <p>Name: {state.config.payeeName}</p>
-        <p>UPI ID: {state.config.payeeVpa}</p>
-        {state.config.gstin && <p>GSTIN: {state.config.gstin}</p>}
+      <div>
+        <p>Payee: {config.payeeName} ({config.payeeVpa})</p>
       </div>
-
-      <div className="payment-methods">
-        <h3>Select Payment App</h3>
-        <div className="app-buttons">
-          {['phonepe', 'gpay', 'paytm', 'bhim'].map(app => (
-            <button
-              key={app}
-              className={`app-button ${state.selectedApp === app ? 'selected' : ''}`}
-              onClick={() => setState(prev => ({ ...prev, selectedApp: app }))}
-              disabled={state.isProcessing}
-
-            >
-              <img
-                src={appIcons[app]}
-                alt={`${app} logo`}
-                className="app-logo"
-
-              />
-              {app.charAt(0).toUpperCase() + app.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        <button
-          className="pay-button"
-          onClick={() => handleAppPayment(state.selectedApp)}
-          disabled={!state.selectedApp || state.isProcessing}
-        >
-          {state.isProcessing ? (
-            <>
-              <span className="processing-spinner"></span>
-              Initiating Payment...
-            </>
-          ) : (
-            'Proceed to Pay'
-          )}
-        </button>
-      </div>
-
-      {state.error && (
-        <div className="transaction-error">
-          <p>❌ {state.error}</p>
-          <button onClick={() => setState(prev => ({ ...prev, error: '' }))}>
-            Dismiss
+      <div className="apps">
+        {['phonepe','gpay','paytm'].map(app => (
+          <button
+            key={app}
+            onClick={() => setSelectedApp(app)}
+            disabled={isPaying}
+            className={selectedApp === app ? 'selected' : ''}
+          >
+            {app.toUpperCase()}
           </button>
-        </div>
-      )}
+        ))}
+      </div>
+      <button
+        onClick={() => handlePayment(selectedApp)}
+        disabled={isPaying || !selectedApp}
+      >
+        {isPaying ? 'Processing…' : 'Pay Now'}
+      </button>
     </div>
   );
 };

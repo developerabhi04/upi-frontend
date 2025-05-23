@@ -5,133 +5,74 @@ import { server } from '../server.js';
 const PaymentStatus = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const [payment, setPayment] = useState({
-    status: 'loading',
-    amount: null,
-    utr: null,
-    timestamp: null,
-    payeeVpa: null,
-    payeeName: null
-  });
+  const [payment, setPayment] = useState({ status: 'loading' });
+  const [retry, setRetry] = useState(0);
   const [error, setError] = useState('');
-  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    if (!sessionId) {
-      navigate('/');
-      return;
-    }
+    if (!sessionId) return navigate('/');
 
-    const checkStatus = async () => {
+    const check = async () => {
       try {
-        const response = await fetch(`${server}/payment/status/${sessionId}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch payment status');
-        }
+        const res = await fetch(`${server}/payment/status/${sessionId}`);
+        if (!res.ok) throw new Error('Failed to fetch payment status');
+        const data = await res.json();
+        setPayment(data);
 
-        const data = await response.json();
-        
-        setPayment({
-          status: data.status,
-          amount: data.amount,
-          utr: data.utr,
-          timestamp: data.timestamp,
-          payeeVpa: data.payeeVpa,
-          payeeName: data.payeeName
-        });
-
-        // Continue polling if pending
-        if (data.status === 'pending' && retryCount < 10) {
-          setTimeout(() => {
-            setRetryCount(retryCount + 1);
-            checkStatus();
-          }, 3000);
+        if (data.status === 'pending' && retry < 10) {
+          setTimeout(() => setRetry(r => r + 1), 3000);
         }
       } catch (err) {
-        console.error('Status check error:', err);
         setError(err.message);
-        
-        if (retryCount < 3) {
-          setTimeout(() => {
-            setRetryCount(retryCount + 1);
-            checkStatus();
-          }, 5000);
+        if (retry < 3) {
+          setTimeout(() => setRetry(r => r + 1), 5000);
         } else {
-          setPayment(prev => ({ ...prev, status: 'error' }));
+          setPayment({ status: 'error' });
         }
       }
     };
 
-    checkStatus();
+    check();
+  }, [sessionId, retry, navigate]);
 
-    return () => {
-      // Cleanup
-    };
-  }, [sessionId, retryCount, navigate]);
-
-  const handleRetry = () => {
-    setRetryCount(0);
-    setPayment(prev => ({ ...prev, status: 'loading' }));
+  const retryNow = () => {
+    setRetry(0);
     setError('');
+    setPayment({ status: 'loading' });
   };
 
+  if (payment.status === 'loading') return <p>Checking payment…</p>;
+
+  if (payment.status === 'pending') {
+    return (
+      <div>
+        <h3>Processing…</h3>
+        <p>Amount: ₹{payment.amount}</p>
+        <p>Attempt: {retry + 1}/10</p>
+      </div>
+    );
+  }
+
+  if (payment.status === 'success') {
+    return (
+      <div>
+        <h3>✅ Payment Successful!</h3>
+        <p><strong>Amount:</strong> ₹{payment.amount}</p>
+        <p><strong>To:</strong> {payment.payeeName}</p>
+        <p><strong>VPA:</strong> {payment.payeeVpa}</p>
+        <p><strong>UTR:</strong> {payment.utr}</p>
+        <p><strong>Date:</strong> {new Date(payment.timestamp).toLocaleString()}</p>
+        <button onClick={() => navigate('/')}>Back to Home</button>
+      </div>
+    );
+  }
+
   return (
-    <div className="status-container">
-      <h2>Payment Status</h2>
-      
-      {payment.status === 'loading' && (
-        <div className="status-loading">
-          <div className="spinner"></div>
-          <p>Checking payment status...</p>
-        </div>
-      )}
-
-      {payment.status === 'pending' && (
-        <div className="status-pending">
-          <div className="spinner"></div>
-          <h3>Payment Processing</h3>
-          <p>Amount: ₹{payment.amount}</p>
-          <p>To: {payment.payeeName} ({payment.payeeVpa})</p>
-          <p>This may take a few moments...</p>
-          <p>Attempt: {retryCount + 1}/10</p>
-        </div>
-      )}
-
-      {payment.status === 'success' && (
-        <div className="status-success">
-          <div className="success-icon">✓</div>
-          <h3>Payment Successful!</h3>
-          <div className="receipt">
-            <p><strong>Amount:</strong> ₹{payment.amount}</p>
-            <p><strong>To:</strong> {payment.payeeName}</p>
-            <p><strong>VPA:</strong> {payment.payeeVpa}</p>
-            <p><strong>UTR:</strong> {payment.utr}</p>
-            <p><strong>Date:</strong> {new Date(payment.timestamp).toLocaleString()}</p>
-          </div>
-          <button onClick={() => navigate('/')} className="home-button">
-            Back to Home
-          </button>
-        </div>
-      )}
-
-      {payment.status === 'error' && (
-        <div className="status-error">
-          <div className="error-icon">✗</div>
-          <h3>Payment Verification Failed</h3>
-          <p>{error || 'Unable to verify payment status'}</p>
-          <p>Session ID: {sessionId}</p>
-          
-          <div className="action-buttons">
-            <button onClick={handleRetry} className="retry-button">
-              Retry Verification
-            </button>
-            <button onClick={() => navigate('/')} className="home-button">
-              Back to Home
-            </button>
-          </div>
-        </div>
-      )}
+    <div>
+      <h3>❌ Verification Failed</h3>
+      <p>{error || 'Unable to verify payment status'}</p>
+      <button onClick={retryNow}>Retry</button>
+      <button onClick={() => navigate('/')}>Home</button>
     </div>
   );
 };
