@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateUpiLink } from '../Utils/UpiUtils.js';
 import { server } from '../server.js';
 import phonepeIcon from '../assets/images.png';
 import payTmIcon from '../assets/unnamed.png';
@@ -61,13 +60,16 @@ const Checkout = () => {
 
   const initiatePaymentSession = async () => {
     try {
-      const orderId = `ORD_${Date.now()}_${crypto.randomUUID().slice(0, 6)}`;
-
+      const orderId = `ORD_${Date.now()}_${window.crypto.randomUUID().slice(0, 6)}`;
+      
       const response = await fetch(`${server}/payment/initiate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Add if using auth
+        },
         body: JSON.stringify({
-          amount: state.amount,
+          amount: Number(state.amount), // Ensure numeric value
           orderId
         })
       });
@@ -83,38 +85,57 @@ const Checkout = () => {
     }
   };
 
+
   const handleAppPayment = async (app) => {
-    if (!app) return;
     try {
       setState(prev => ({ ...prev, isProcessing: true, error: '' }));
 
-      // Create payment session, generate links
+      // Step 1: Create payment session with backend
       const sessionData = await initiatePaymentSession();
-      const upiLinks = generateUpiLink(sessionData.config, sessionData);
       
-      // Deep link URL mapping
+      // Step 2: Generate platform-specific UPI links
+      const upiParams = new URLSearchParams({
+        pa: sessionData.payeeVpa,
+        pn: encodeURIComponent(sessionData.payeeName),
+        am: sessionData.amount.toFixed(2),
+        tn: `Payment-${sessionData.orderId}`.substring(0, 50),
+        tr: sessionData.sessionId,
+        cu: 'INR',
+        mc: '6012', // Force MCC for IDFC
+        mode: '02',
+        orgid: '000393'
+      });
+
+      // Step 3: Handle app-specific deep links
       const appUrls = {
-        phonepe: `phonepe://pay?${upiLinks.params}`,
-        gpay: `tez://upi/pay?${upiLinks.params}`,
-        paytm: `paytmmp://pay?${upiLinks.params}`,
-        bhim: `upi://pay?${upiLinks.params}`
+        phonepe: `phonepe://pay?${upiParams}`,
+        gpay: `tez://upi/pay?${upiParams}`,
+        paytm: `paytmmp://pay?${upiParams}`,
+        bhim: `upi://pay?${upiParams}`
       };
 
-      // Navigate to status and open app
-      navigate(`/status/${sessionData.sessionId}`);
+      // Step 4: Open payment app
       const popup = window.open(appUrls[app], '_blank');
+      
+      // Fallback handling
       setTimeout(() => {
-        if (!popup || popup.closed) window.location.href = upiLinks.webFallback;
+        if (!popup || popup.closed) {
+          window.location.href = `https://upilink.in/pay?${upiParams}`;
+        }
       }, 2500);
+
+      // Step 5: Navigate to status page
+      navigate(`/status/${sessionData.sessionId}`);
 
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error.message,
+        error: error.message.replace('Payment initialization error: ', ''),
         isProcessing: false
       }));
     }
   };
+
 
   if (state.loading) {
     return (
